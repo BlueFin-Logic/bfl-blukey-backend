@@ -24,12 +24,14 @@ class BaseRepository {
         try {
             let pool = await sql.connect(this.connectString);
             let offset = (page - 1) * limit;
-            let queryStatement = `SELECT *
-                    FROM ${this.table}
-                    ORDER BY id ASC
-                    OFFSET ${offset} ROWS
-                    FETCH NEXT ${limit} ROWS ONLY`;
-            let result = await pool.request().query(queryStatement);
+            let result = await pool.request()
+                .input('offset', sql.Int, offset)
+                .input('limit', sql.Int, limit)
+                .query(`SELECT *
+                        FROM ${this.table}
+                        ORDER BY id ASC
+                        OFFSET @offset ROWS
+                        FETCH NEXT @limit ROWS ONLY`);
             return result.recordsets[0];
         } catch (err) {
             console.error(err);
@@ -39,10 +41,10 @@ class BaseRepository {
 
     async getById(id) {
         try {
-            await sql.connect(this.connectString);
-            const request = new sql.Request();
-            request.input('id', sql.Int, id);
-            let result = await request.query(`SELECT * FROM ${this.table} WHERE id = @id`);
+            let pool = await sql.connect(this.connectString);
+            let result = await pool.request()
+                .input('id', sql.Int, id)
+                .query(`SELECT * FROM ${this.table} WHERE id = @id`);
             result = result.recordsets[0];
             if (result && result.length > 0) return result[0];
             return result;
@@ -109,7 +111,7 @@ class BaseRepository {
             for (const [key, value] of Object.entries(item)) {
                 if (value !== null) {
                     let _value = value;
-                    //check json from cosmos
+                    // Check value is json and not string
                     if (Utilities.isObject(value)) {
                         _value = JSON.stringify(value);
                     }
@@ -119,10 +121,6 @@ class BaseRepository {
                     builCommand.push(`[${key}] = NULL`);
                 }
             }
-            //add this config "SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON" to avoid "The identifier that starts with...is too long. Maximum length is 128."
-            // QUOTED_IDENTIFIER ON: "column" == [column]
-            // QUOTED_IDENTIFIER OFF: "column" == 'column'
-            // ANSI_NULLS ON: ColumnValue IS NULL, can not using =, <>, etc.
             let queryStatement = `SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON UPDATE ${this.table} SET ${builCommand.join(",")} WHERE id = @id`;
             let result = await req.query(queryStatement);
             await transaction.commit();

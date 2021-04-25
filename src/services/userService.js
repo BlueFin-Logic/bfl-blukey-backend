@@ -7,10 +7,6 @@ class UserService extends BaseService {
         super(TABLE_USER);
         this.userRepository = new UserRepository();
     }
-
-    async getByFilter(display, device_model) {
-        return await this.userRepository.getByFilter(display, device_model);
-    }
 }
 
 module.exports = UserService;
