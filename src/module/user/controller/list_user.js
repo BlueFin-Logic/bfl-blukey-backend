@@ -1,19 +1,9 @@
 const sql = require('mssql')
-
-const config = {
-    user: 'lamnguyen',
-    password: 'Thanhnam0',
-    server: 'bluefinlogic.database.windows.net',
-    database: 'real-estate',
-    options: {
-        encrypt: true, // for azure
-        trustServerCertificate: true // change to true for local dev / self-signed certs
-    }
-}
+const config = require('./../../../config')
 
 module.exports.listUser = async (req, res) => {
     try {
-        let pool = await sql.connect(config)
+        let pool = await sql.connect(config.sql);
         let result = await pool.request()
             .query('SELECT * FROM [User]')
 

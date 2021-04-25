@@ -1,19 +1,9 @@
 const sql = require('mssql')
-
-const config = {
-    user: 'lamnguyen',
-    password: 'Thanhnam0',
-    server: 'bluefinlogic.database.windows.net',
-    database: 'real-estate',
-    options: {
-        encrypt: true, // for azure
-        trustServerCertificate: true // change to true for local dev / self-signed certs
-    }
-}
+const config = require('./../../../config')
 
 module.exports.createUser = async (req, res) => {
     try {
-        let pool = await sql.connect(config)
+        let pool = await sql.connect(config.sql);
         let result = await pool.request()
         .input('first_name', sql.VarChar, req.body.first_name)
         .input('last_name', sql.VarChar, req.body.last_name)
@@ -31,7 +21,3 @@ module.exports.createUser = async (req, res) => {
         return res.send(err)
     }
 }
-
-// exports.createUser = async (req, res) => {
-//     res.send(req.body)
-// }
