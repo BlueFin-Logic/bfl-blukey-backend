@@ -9,6 +9,8 @@ app.use(express.json())
 
 // check connection
 app.get("/ping", (req, res) => {
+    // req.query
+    // res.status().json()
     res.send("pong");
 });
 
