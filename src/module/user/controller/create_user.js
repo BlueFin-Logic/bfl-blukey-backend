@@ -11,7 +11,7 @@ const config = {
     }
 }
 
-exports.createUser = async (req, res) => {
+module.exports.createUser = async (req, res) => {
     try {
         let pool = await sql.connect(config)
         let result = await pool.request()

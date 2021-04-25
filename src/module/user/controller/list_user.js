@@ -11,12 +11,11 @@ const config = {
     }
 }
 
-exports.listUser = async (req, res) => {
+module.exports.listUser = async (req, res) => {
     try {
         let pool = await sql.connect(config)
         let result = await pool.request()
             .query('SELECT * FROM [User]')
-
 
         console.log(result);
         return res.send(result.recordsets)

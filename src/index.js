@@ -1,19 +1,20 @@
 const express = require("express");
 const app = express();
-const bodyParser = require("body-parser");
+const routes = require( "./routes/index");
 const dotenv = require( "dotenv");
 dotenv.config();
 const port = process.env.SERVER_PORT;
 
-// accept parse json from body
-app.use(bodyParser.json())
+// body parse
+app.use(express.urlencoded({extended: true}))
+app.use(express.json())
 
-// define a route handler for the default home page
+// check connection
 app.get( "/ping", ( req, res ) => {
     res.send( "pong" );
 } );
 
-const {routes} = require( "./routes/index");
+// user routes index
 app.use(routes)
 
 // start the Express server
