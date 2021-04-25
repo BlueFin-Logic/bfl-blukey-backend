@@ -7,6 +7,10 @@ class UserService extends BaseService {
         super(TABLE_USER);
         this.userRepository = new UserRepository();
     }
+
+    async getAll(page, limit) {
+        return await this.userRepository.getAll(page, limit);
+    }
 }
 
 module.exports = UserService;

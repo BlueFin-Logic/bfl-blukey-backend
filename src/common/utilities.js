@@ -33,6 +33,16 @@ class Utilities {
     isObject(p) {
         return (p != null && typeof p === 'object');
     }
+
+    responsePaging(data, page, limit) {
+        return {
+            data: data,
+            paging: {
+                page: page,
+                total: limit
+            }
+        };
+    }
 }
 
 module.exports.Utilities = new Utilities();
