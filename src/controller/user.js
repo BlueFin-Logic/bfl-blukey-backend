@@ -1,5 +1,5 @@
 const UserService = require('../services/userService')
-const { STATUS_OK, STATUS_BAD_REQUEST } = require('../common/statusResponse')
+const { STATUS_OK, STATUS_CREATED, STATUS_BAD_REQUEST } = require('../common/statusResponse')
 
 // Get All Users
 module.exports.userListController = async (req, res) => {
@@ -40,7 +40,7 @@ module.exports.userCreateController = async (req, res) => {
         
         let result = await userService.addItem(body)
         console.log(result);
-        return res.status(STATUS_OK).json(result)
+        return res.status(STATUS_CREATED).json(result)
     } catch (err) {
         console.log(err);
         return res.status(STATUS_BAD_REQUEST).json(err)
@@ -56,7 +56,7 @@ module.exports.userUpdateController = async (req, res) => {
         
         let result = await userService.updateItem(id, body)
         console.log(result);
-        return res.status(STATUS_OK).json(result)
+        return res.status(STATUS_CREATED).json(result)
     } catch (err) {
         console.log(err);
         return res.status(STATUS_BAD_REQUEST).json(err)

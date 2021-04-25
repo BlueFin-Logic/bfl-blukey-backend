@@ -1,1 +1,1 @@
-module.exports.TABLE_USER = "[User]"
+module.exports.TABLE_USER = "[Users]"
