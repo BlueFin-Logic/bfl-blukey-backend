@@ -77,3 +77,18 @@ module.exports.userDeleteController = async (req, res) => {
         return res.status(STATUS_BAD_REQUEST).json(err)
     }
 }
+
+// Ping user
+module.exports.userPingController = async (req, res) => {
+    try {
+        let check = {
+            id: req.currentUserId,
+            role: req.currentUserRole
+        }
+        console.log(check);
+        return res.status(STATUS_OK).json(check)
+    } catch (err) {
+        console.log(err);
+        return res.status(STATUS_BAD_REQUEST).json(err)
+    }
+}

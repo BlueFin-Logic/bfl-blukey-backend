@@ -11,7 +11,13 @@ const {
     SQL_USER,
     SQL_PASSWORD,
     SQL_DATABASE,
-    SQL_SERVER
+    SQL_SERVER,
+    ISSUER,
+    SUBJECT,
+    AUDIENCE,
+    ALGORITHM,
+    TOKEN_SECRET,
+    EXPIRES_IN,
 } = process.env;
 
 const sqlEncrypt = process.env.SQL_ENCRYPT === "true";
@@ -31,5 +37,13 @@ module.exports = {
             encrypt: sqlEncrypt,
             trustServerCertificate: sqlTrustServerCertificate
         },
+    },
+    token: {
+        issuer: ISSUER,
+        subject: SUBJECT,
+        audience: AUDIENCE,
+        algorithm: ALGORITHM,
+        token_secret: TOKEN_SECRET,
+        expiresIn: EXPIRES_IN,
     },
 };

@@ -1,8 +1,9 @@
 const BaseService = require('./baseService');
 const UserRepository = require('../repositories/userRepository');
-const bcrypt = require('bcrypt');
+const { HashService } = require('../common/hash');
 const { Utilities } = require('../common/utilities');
 const { TABLE_USER } = require('../common/table');
+const { STATUS_OK, STATUS_CREATED, STATUS_BAD_REQUEST } = require('../common/statusResponse')
 
 class UserService extends BaseService {
     constructor() {
@@ -15,16 +16,21 @@ class UserService extends BaseService {
     }
 
     async addItem(item) {
-        let user = await this.userRepository.getByEmail(item.email);
-        if (!Utilities.isEmpty(user)) return { message: "Email already exist!" }
+        try {
+            let user = await this.userRepository.getByEmail(item.email);
+            if (!Utilities.isEmpty(user)) return { message: "Email already exist!" }
 
-        let salt =  await bcrypt.genSalt(15);
-        let passwordHash =  await bcrypt.hash(item.password, salt)
-        
-        item.salt = salt;
-        item.password = passwordHash;
+            let salt = await HashService.genSalt(15);
 
-        return await this.userRepository.addItem(item);
+            let passwordHash = HashService.hashMD5(item.password + salt);
+
+            item.salt = salt;
+            item.password = passwordHash;
+
+            return await this.userRepository.addItem(item);
+        } catch (error) {
+            throw error
+        }
     }
 }
 

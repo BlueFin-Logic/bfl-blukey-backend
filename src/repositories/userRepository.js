@@ -24,7 +24,7 @@ class UserRepository extends BaseRepository {
             let pool = await sql.connect(this.connectString);
             let result = await pool.request()
                 .input('email', sql.NVarChar, data)
-                .query(`SELECT * FROM ${this.table} WHERE email = @email`);
+                .query(`SELECT id, email, password, salt, is_admin FROM ${this.table} WHERE email = @email`);
             result = result.recordsets[0];
             if (result && result.length > 0) return result[0];
             return result;

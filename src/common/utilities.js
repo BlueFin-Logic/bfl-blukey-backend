@@ -43,6 +43,12 @@ class Utilities {
             }
         };
     }
+
+    responseSimple(message) {
+        return {
+            message: message
+        };
+    }
 }
 
 module.exports.Utilities = new Utilities();
