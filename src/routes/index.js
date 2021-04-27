@@ -7,3 +7,4 @@ const { authenLoginController } = require("../controller/authen");
 module.exports = router.post("/api/v1/login", authenLoginController)
 
 module.exports = router.use("/api/v1/users", authorizeController, users)
+// module.exports = router.use("/api/v1/users", users)
