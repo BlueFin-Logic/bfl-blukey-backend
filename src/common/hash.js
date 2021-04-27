@@ -1,17 +1,12 @@
-const bcrypt = require('bcrypt');
-const objectHash = require('object-hash');
+"use strict";
+const nodemailer = require("nodemailer");
 
-class HashService {
+class EmailService {
     constructor() {
     }
 
-    async genSalt(length) {
-        return await bcrypt.genSalt(length);
-    }
-
-    hashMD5(data) {
-        return objectHash(data, { algorithm: 'md5', encoding: 'base64' });
+    async sendMail(length) {
     }
 }
 
-module.exports.HashService = new HashService();
+module.exports.HashService = new EmailService();

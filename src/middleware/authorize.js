@@ -1,6 +1,6 @@
 const { Utilities } = require('../common/utilities')
 const { TokenService } = require('../common/token');
-const { STATUS_UNAUTHORIZED, STATUS_FORBIDDEN, STATUS_BAD_REQUEST } = require('../common/statusResponse')
+const { STATUS_UNAUTHORIZED, STATUS_FORBIDDEN } = require('../common/statusResponse')
 
 // Login user
 module.exports.authorizeController = async (req, res, next) => {
