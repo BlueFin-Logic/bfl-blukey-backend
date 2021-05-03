@@ -1,7 +1,7 @@
 const sql = require('mssql');
 const BaseRepository = require('./baseRepository');
-const { Utilities } = require('../common/utilities');
-const { TABLE_USER } = require('../common/table');
+const { UserModel } = require('../model/table');
+const TABLE_USER = UserModel.tableName
 
 class UserRepository extends BaseRepository {
     constructor() {
@@ -9,31 +9,21 @@ class UserRepository extends BaseRepository {
         this.table = TABLE_USER;
     }
 
-    async getAll(page, limit) {
+    async ping() {
         try {
-            let result = await super.getAll(page, limit);
-            return Utilities.responsePaging(result, Utilities.parseInt(page, 0), Utilities.parseInt(result.length, 0));
+            let request = await this.request();
+            let result = await request.query(`SELECT *, (SELECT [Documents].[id], [Documents].[link]
+                                                        FROM [Documents]  
+                                                        WHERE [Documents].[user_id] = [Users].[id]
+                                                        FOR JSON PATH) AS docs
+                                            FROM [Users]
+                                            FOR JSON PATH, INCLUDE_NULL_VALUES`);
+            return result.recordsets[0][0];
         } catch (err) {
             console.error(err);
             throw err;
         }
     }
-
-    async getByEmail(data) {
-        try {
-            let pool = await sql.connect(this.connectString);
-            let result = await pool.request()
-                .input('email', sql.NVarChar, data)
-                .query(`SELECT id, email, password, salt, is_admin FROM ${this.table} WHERE email = @email`);
-            result = result.recordsets[0];
-            if (result && result.length > 0) return result[0];
-            return result;
-        } catch (err) {
-            console.error(err);
-            throw err;
-        }
-    }
-
 }
 
 module.exports = UserRepository;

@@ -1,4 +1,5 @@
 const BaseRepository = require('../repositories/baseRepository');
+const { BaseModel } = require('../model/table');
 
 class BaseService {
     constructor(containerID) {
@@ -6,11 +7,14 @@ class BaseService {
     }
 
     async getAll(page, limit) {
-        return await this.baseRepository.getAll(page, limit);
+        let fields = "*"
+        return await this.baseRepository.getAll(page, limit, fields);
     }
 
-    async getById(id) {
-        return await this.baseRepository.getById(id);
+    async getById(data) {
+        let fields = "*"
+        let condition = `${BaseModel.column_id} = ${data}`
+        return await this.baseRepository.getByCondition(fields, condition);
     }
 
     async addItem(item) {

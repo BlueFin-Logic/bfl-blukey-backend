@@ -3,8 +3,8 @@ const UserRepository = require('../repositories/userRepository');
 const { HashService } = require('../common/hash');
 const { TokenService } = require('../common/token');
 const { Utilities } = require('../common/utilities');
-const { TABLE_USER } = require('../common/table');
-const { STATUS_OK, STATUS_CREATED, STATUS_BAD_REQUEST } = require('../common/statusResponse')
+const { UserModel } = require('../model/table');
+const TABLE_USER = UserModel.tableName
 
 class AuthenService extends BaseService {
     constructor() {
@@ -16,7 +16,12 @@ class AuthenService extends BaseService {
         try {
             let email = item.email;
             let password = item.password;
-            let user = await this.userRepository.getByEmail(email);
+
+            let fields = `${UserModel.column_id},${UserModel.column_salt},${UserModel.column_password},${UserModel.column_is_admin}`;
+            let condition = `${UserModel.column_email} = '${item.email}'`;
+            
+            let user = await this.userRepository.getByCondition(fields, condition);
+
             if (Utilities.isEmpty(user)) return "Email is not found!"
             let passwordHash = HashService.hashMD5(password + user.salt)
             if (passwordHash !== user.password) return "Invalid password."

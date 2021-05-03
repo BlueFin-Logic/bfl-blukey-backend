@@ -1,13 +1,19 @@
 const express = require("express");
 const router = express.Router();
-const { userListController, userGetByIdController, userCreateController, userUpdateController, userDeleteController, userPingController } = require("../controller/user");
+const userController = require("../controller/user");
 
-// module.exports = router.get("/ping", userPingController)
+// router.get("/ping", userController.ping)
 
-module.exports = router.get("", userListController)
-module.exports = router.get("/:id", userGetByIdController)
-module.exports = router.post("", userCreateController)
-module.exports = router.put("/:id", userUpdateController)
-module.exports = router.delete("/:id", userDeleteController)
+router.get("", userController.list)
+router.get("/:id", userController.getByID)
+router.post("", userController.create)
+router.put("/:id", userController.update)
+router.delete("/:id", userController.delete)
+// router
+//     .route("")
+//     .get(userListController)
+//     .post(userCreateController);
+
+module.exports = router;
 
 

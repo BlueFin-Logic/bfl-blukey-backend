@@ -1,37 +1,91 @@
 const sql = require('mssql');
 const config = require('../config');
 const { Utilities } = require('../common/utilities');
+const { BaseModel } = require('../model/table');
 
 class BaseRepository {
     constructor(table) {
         this.table = table;
 
-        this.config = {
-            server: config.sql.server,
-            database: config.sql.database,
+        // this.config = {
+        //     server: config.sql.server,
+        //     database: config.sql.database,
+        //     user: config.sql.user,
+        //     password: config.sql.password,
+        //     port: 1433,
+        //     encrypt: config.sql.options.encrypt,
+        //     // trustServerCertificate: config.sql.options.trustServerCertificate,
+        //     // parseJSON: true
+        // };
+
+        // this.connectString = `Server=tcp:${this.config.server},1433;Initial Catalog=${this.config.database};Persist Security Info=False;User ID=${this.config.user};Password=${this.config.password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;`;
+
+        this.connectString = {
             user: config.sql.user,
             password: config.sql.password,
-            encrypt: config.sql.options.encrypt,
-            trustServerCertificate: config.sql.options.trustServerCertificate,
-            port: 1433,
-            parseJSON: true
-        };
-
-        this.connectString = `Server=tcp:${this.config.server},1433;Initial Catalog=${this.config.database};Persist Security Info=False;User ID=${this.config.user};Password=${this.config.password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;`;
+            server: config.sql.server,
+            database: config.sql.database,
+            connectionTimeout: 15000,
+            parseJSON: true,
+            options: {
+                encrypt: config.sql.options.encrypt, // for azure
+                trustServerCertificate: config.sql.options.trustServerCertificate // change to true for local dev / self-signed certs
+            }
+        }
     }
 
-    async getAll(page, limit) {
+    async connectionPool() {
         try {
-            let pool = await sql.connect(this.connectString);
+            const pool = new sql.ConnectionPool(this.connectString);
+            await pool.connect();
+            return pool;
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
+    async connect() {
+        try {
+            return await sql.connect(this.connectString);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
+    async request() {
+        try {
+            let pool = await this.connect();
+            return new sql.Request(pool);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
+    async transaction() {
+        try {
+            let pool = await this.connect();
+            return new sql.Transaction(pool);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
+    async getAll(page, limit, fields) {
+        try {
+            let queryStatement = `SELECT ${fields}
+                                FROM ${this.table}
+                                ORDER BY ${BaseModel.column_updated_at} DESC
+                                OFFSET @offset ROWS
+                                FETCH NEXT @limit ROWS ONLY`;
             let offset = (page - 1) * limit;
-            let result = await pool.request()
-                .input('offset', sql.Int, offset)
-                .input('limit', sql.Int, limit)
-                .query(`SELECT *
-                        FROM ${this.table}
-                        ORDER BY id ASC
-                        OFFSET @offset ROWS
-                        FETCH NEXT @limit ROWS ONLY`);
+            let request = await this.request();
+            request.input('offset', sql.Int, offset)
+            request.input('limit', sql.Int, limit)
+            let result = await request.query(queryStatement);
             return result.recordsets[0];
         } catch (err) {
             console.error(err);
@@ -39,12 +93,13 @@ class BaseRepository {
         }
     }
 
-    async getById(id) {
+    async getByCondition(fields, condition) {
         try {
-            let pool = await sql.connect(this.connectString);
-            let result = await pool.request()
-                .input('id', sql.Int, id)
-                .query(`SELECT * FROM ${this.table} WHERE id = @id`);
+            let queryStatement = `SELECT ${fields}
+                                FROM ${this.table}
+                                WHERE ${condition}`;
+            let request = await this.request();
+            let result = await request.query(queryStatement);
             result = result.recordsets[0];
             if (result && result.length > 0) return result[0];
             return result;
@@ -55,8 +110,7 @@ class BaseRepository {
     }
 
     async addItem(item) {
-        let pool = await sql.connect(this.connectString);
-        const transaction = new sql.Transaction(pool);
+        const transaction = await this.transaction();
         try {
             await transaction.begin();
             const request = new sql.Request(transaction);
@@ -101,8 +155,7 @@ class BaseRepository {
     }
 
     async updateItem(id, item) {
-        let pool = await sql.connect(this.connectString);
-        const transaction = new sql.Transaction(pool);
+        const transaction = await this.transaction();
         try {
             await transaction.begin();
             const req = new sql.Request(transaction);
@@ -143,8 +196,9 @@ class BaseRepository {
     }
 
     async deleteItem(id) {
-        let pool = await sql.connect(this.connectString);
-        const transaction = new sql.Transaction(pool);
+        // let pool = await this.connect();
+        // const transaction = new sql.Transaction(pool);
+        const transaction = await this.transaction();
         try {
             await transaction.begin();
             const req = new sql.Request(transaction);

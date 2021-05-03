@@ -1,10 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const users = require("./users");
-const { authorizeController } = require("../middleware/authorize");
-const { authenLoginController } = require("../controller/authen");
+const userController = require("../controller/user");
+const authenController = require("../controller/authen");
+const middlewareController = require("../middleware/authorize");
 
-module.exports = router.post("/api/v1/login", authenLoginController)
+// register
+module.exports = router.post("/api/v1/register", userController.register)
+// login
+module.exports = router.post("/api/v1/login", authenController.login)
+// user
+module.exports = router.use("/api/v1/users", middlewareController.authorize, users)
 
-module.exports = router.use("/api/v1/users", authorizeController, users)
-// module.exports = router.use("/api/v1/users", users)
+// register
+module.exports = router.get("/api/v1/ping", userController.ping)
