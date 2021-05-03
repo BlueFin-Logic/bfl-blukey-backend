@@ -30,8 +30,8 @@ CREATE TABLE [Users] (
 	[is_admin] BIT DEFAULT 0, 
 	[is_deleted] BIT DEFAULT 0, 
 	[created_at] DATETIME NOT NULL,
-	[updated_at] DATETIME NULL,
-	[last_login_date] DATETIME NULL,
+	[updated_at] DATETIME NOT NULL,
+	[last_login_date] DATETIME NOT NULL,
 );
 
 
