@@ -3,7 +3,7 @@ const config = require('../config');
 const { Utilities } = require('../common/utilities');
 const { BaseModel } = require('../model/table');
 
-class BaseRepository {
+class BaseService {
     constructor(table) {
         this.table = table;
 
@@ -34,16 +34,16 @@ class BaseRepository {
         }
     }
 
-    async connectionPool() {
-        try {
-            const pool = new sql.ConnectionPool(this.connectString);
-            await pool.connect();
-            return pool;
-        } catch (err) {
-            console.error(err);
-            throw err;
-        }
-    }
+    // async connectionPool() {
+    //     try {
+    //         const pool = new sql.ConnectionPool(this.connectString);
+    //         await pool.connect();
+    //         return pool;
+    //     } catch (err) {
+    //         console.error(err);
+    //         throw err;
+    //     }
+    // }
 
     async connect() {
         try {
@@ -222,4 +222,4 @@ class BaseRepository {
         }
     }
 }
-module.exports = BaseRepository;
+module.exports = BaseService;

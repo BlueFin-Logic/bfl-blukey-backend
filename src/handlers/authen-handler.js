@@ -1,15 +1,15 @@
-const BaseService = require('./baseService');
-const UserRepository = require('../repositories/userRepository');
+const BaseHandler = require('./base-handler');
+const UserService = require('../services/user-service');
 const { HashService } = require('../common/hash');
 const { TokenService } = require('../common/token');
 const { Utilities } = require('../common/utilities');
 const { UserModel } = require('../model/table');
 const TABLE_USER = UserModel.tableName
 
-class AuthenService extends BaseService {
+class AuthenHandler extends BaseHandler {
     constructor() {
         super(TABLE_USER);
-        this.userRepository = new UserRepository();
+        this.userService = new UserService();
     }
 
     async login(item) {
@@ -20,7 +20,7 @@ class AuthenService extends BaseService {
             let fields = `${UserModel.column_id},${UserModel.column_salt},${UserModel.column_password},${UserModel.column_is_admin}`;
             let condition = `${UserModel.column_email} = '${item.email}'`;
             
-            let user = await this.userRepository.getByCondition(fields, condition);
+            let user = await this.userService.getByCondition(fields, condition);
 
             if (Utilities.isEmpty(user)) return "Email is not found!"
             let passwordHash = HashService.hashMD5(password + user.salt)
@@ -37,4 +37,4 @@ class AuthenService extends BaseService {
     }
 }
 
-module.exports = AuthenService;
+module.exports = AuthenHandler;

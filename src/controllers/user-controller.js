@@ -1,4 +1,4 @@
-const UserService = require('../services/userService')
+const UserHandler = require('../handlers/user-handler')
 const { Utilities } = require('../common/utilities')
 const { STATUS_OK, STATUS_CREATED, STATUS_BAD_REQUEST, STATUS_FORBIDDEN } = require('../common/statusResponse')
 
@@ -13,8 +13,8 @@ class UserController {
             const is_admin = req.currentUserRole;
             if (!is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let userService = new UserService();
-            let result = await userService.getAll(page, limit)
+            let userHandler = new UserHandler();
+            let result = await userHandler.getAll(page, limit)
             console.log(result);
             return res.status(STATUS_OK).json(result)
         } catch (err) {
@@ -28,14 +28,14 @@ class UserController {
         try {
             const id = Utilities.parseInt(req.params.id, 1);
 
-            let userService = new UserService();
+            let userHandler = new UserHandler();
 
             // Only user can get data yourseft or admin
             const currentUserId = req.currentUserId;
             const is_admin = req.currentUserRole;
             if (currentUserId !== id && !is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let result = await userService.getById(id)
+            let result = await userHandler.getById(id)
             console.log(result);
             return res.status(STATUS_OK).json(result)
         } catch (err) {
@@ -53,8 +53,8 @@ class UserController {
             const is_admin = req.currentUserRole;
             if (!is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let userService = new UserService();
-            let result = await userService.addItem(body)
+            let userHandler = new UserHandler();
+            let result = await userHandler.addItem(body)
             console.log(result);
             return res.status(STATUS_CREATED).json(result)
         } catch (err) {
@@ -74,8 +74,8 @@ class UserController {
             const is_admin = req.currentUserRole;
             if (currentUserId !== id && !is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let userService = new UserService();
-            let result = await userService.updateItem(id, body)
+            let userHandler = new UserHandler();
+            let result = await userHandler.updateItem(id, body)
             console.log(result);
             return res.status(STATUS_CREATED).json(result)
         } catch (err) {
@@ -93,8 +93,8 @@ class UserController {
             const is_admin = req.currentUserRole;
             if (!is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let userService = new UserService();
-            let result = await userService.deleteItem(id)
+            let userHandler = new UserHandler();
+            let result = await userHandler.deleteItem(id)
             console.log(result);
             return res.status(STATUS_OK).json(result)
         } catch (err) {
@@ -108,8 +108,8 @@ class UserController {
         try {
             const body = req.body;
 
-            let userService = new UserService();
-            let result = await userService.addItem(body)
+            let userHandler = new UserHandler();
+            let result = await userHandler.addItem(body)
             console.log(result);
             return res.status(STATUS_CREATED).json(result)
         } catch (err) {
@@ -121,8 +121,8 @@ class UserController {
     // Ping user
     async ping(req, res, next) {
         try {
-            let userService = new UserService();
-            let result = await userService.ping()
+            let userHandler = new UserHandler();
+            let result = await userHandler.ping()
             console.log(result);
             return res.status(STATUS_OK).json(result)
         } catch (err) {

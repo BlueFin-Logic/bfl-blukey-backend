@@ -1,9 +1,8 @@
-const sql = require('mssql');
-const BaseRepository = require('./baseRepository');
+const BaseService = require('./base-service');
 const { UserModel } = require('../model/table');
 const TABLE_USER = UserModel.tableName
 
-class UserRepository extends BaseRepository {
+class UserService extends BaseService {
     constructor() {
         super(TABLE_USER);
         this.table = TABLE_USER;
@@ -12,13 +11,15 @@ class UserRepository extends BaseRepository {
     async ping() {
         try {
             let request = await this.request();
-            let result = await request.query(`SELECT *, (SELECT [Documents].[id], [Documents].[link]
+            let result1 = await request.query(`SELECT *, (SELECT [Documents].[id], [Documents].[link]
                                                         FROM [Documents]  
                                                         WHERE [Documents].[user_id] = [Users].[id]
                                                         FOR JSON PATH) AS docs
                                             FROM [Users]
                                             FOR JSON PATH, INCLUDE_NULL_VALUES`);
-            return result.recordsets[0][0];
+
+            let result2 = await request.query(`SELECT *FROM [Users] FOR JSON PATH, INCLUDE_NULL_VALUES`);
+            return result1.recordsets[0][0];
         } catch (err) {
             console.error(err);
             throw err;
@@ -26,4 +27,4 @@ class UserRepository extends BaseRepository {
     }
 }
 
-module.exports = UserRepository;
+module.exports = UserService;

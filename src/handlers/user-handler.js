@@ -1,15 +1,15 @@
-const BaseService = require('./baseService');
-const UserRepository = require('../repositories/userRepository');
+const BaseHandler = require('./base-handler');
+const UserService = require('../services/user-service');
 const { HashService } = require('../common/hash');
 const { Utilities } = require('../common/utilities');
 const { UserModel } = require('../model/table');
 // const { TABLE_USER } = require('../common/table');
 const TABLE_USER = UserModel.tableName;
 
-class UserService extends BaseService {
+class UserHandler extends BaseHandler {
     constructor() {
         super(TABLE_USER);
-        this.userRepository = new UserRepository();
+        this.userService = new UserService();
     }
 
     async getAll(page, limit) {
@@ -20,7 +20,7 @@ class UserService extends BaseService {
                                 ${UserModel.column_email},
                                 ${UserModel.column_address},
                                 ${UserModel.column_username}`;
-            let result = await this.userRepository.getAll(page, limit, fields);
+            let result = await this.userService.getAll(page, limit, fields);
             return Utilities.responsePaging(result, Utilities.parseInt(page, 0), Utilities.parseInt(result.length, 0));
         } catch (err) {
             console.error(err);
@@ -38,7 +38,7 @@ class UserService extends BaseService {
                         ${UserModel.column_username},
                         ${UserModel.column_is_admin}`;
             let condition = `${UserModel.column_id} = ${data} AND ${UserModel.column_is_deleted} = 0`;
-            return await this.userRepository.getByCondition(fields, condition);
+            return await this.userService.getByCondition(fields, condition);
         } catch (err) {
             console.error(err);
             throw err;
@@ -50,7 +50,7 @@ class UserService extends BaseService {
             let fields = `${UserModel.column_id}`;
             let condition = `${UserModel.column_email} = '${item.email}'`;
 
-            let user = await this.userRepository.getByCondition(fields, condition);
+            let user = await this.userService.getByCondition(fields, condition);
 
             if (!Utilities.isEmpty(user)) return { message: "Email already exist!" }
 
@@ -69,15 +69,15 @@ class UserService extends BaseService {
                 item.is_deleted,
             );
 
-            return await this.userRepository.addItem(data);
+            return await this.userService.addItem(data);
         } catch (error) {
             throw error
         }
     }
 
     async ping() {
-        return await this.userRepository.ping();
+        return await this.userService.ping();
     }
 }
 
-module.exports = UserService;
+module.exports = UserHandler;
