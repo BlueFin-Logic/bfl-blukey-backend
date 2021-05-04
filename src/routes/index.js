@@ -5,12 +5,14 @@ const userController = require("../controllers/user-controller");
 const authenController = require("../controllers/authen-controller");
 const middlewareController = require("../middleware/authorize");
 
-// register
-module.exports = router.post("/api/v1/register", userController.register)
-// login
-module.exports = router.post("/api/v1/login", authenController.login)
-// user
-module.exports = router.use("/api/v1/users", middlewareController.authorize, users)
-
-// register
-module.exports = router.get("/api/v1/ping", userController.ping)
+module.exports = function setupRouter(appContext) {
+    // register
+    router.post("/api/v1/register", userController.registerUser(appContext))
+    // login
+    router.post("/api/v1/login", authenController.login(appContext))
+    // user
+    router.use("/api/v1/users", middlewareController.authorize, users(appContext))
+    // register
+    router.get("/api/v1/ping", userController.pingUser(appContext))
+    return router;
+}

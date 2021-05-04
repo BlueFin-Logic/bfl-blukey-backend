@@ -3,6 +3,8 @@ const app = express();
 const config = require('./config');
 const routes = require("./routes/index");
 const errorHandler = require("./error/errorHandler.js");
+const AppContext = require("./common/appContext");
+
 
 // body parse
 app.use(express.urlencoded({ extended: true }))
@@ -15,8 +17,9 @@ app.get("/ping", (req, res) => {
     res.send("pong");
 });
 
+const appContext = new AppContext(poolMSSQL);
 // user routes index
-app.use(routes)
+app.use(routes(appContext))
 
 // handle error
 app.use(errorHandler);

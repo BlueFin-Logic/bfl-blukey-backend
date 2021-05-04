@@ -2,10 +2,11 @@ const UserHandler = require('../handlers/user-handler')
 const { Utilities } = require('../common/utilities')
 const { STATUS_OK, STATUS_CREATED, STATUS_BAD_REQUEST, STATUS_FORBIDDEN } = require('../common/statusResponse')
 
-class UserController {
-    // Get All Users
-    async list(req, res, next) {
+// Get All Users
+module.exports.listUser = function listUser(appContext) {
+    return async (req, res, next) => {
         try {
+            console.log(appContext);
             const page = Utilities.parseInt(req.query.page, 1);
             const limit = Utilities.parseInt(req.query.limit, 10);
 
@@ -22,9 +23,11 @@ class UserController {
             return res.status(STATUS_BAD_REQUEST).json(err)
         }
     }
+}
 
-    // Get User By ID
-    async getByID(req, res, next) {
+// Get User By ID
+module.exports.getByIdUser = function getByIdUser(appContext) {
+    return async (req, res, next) => {
         try {
             const id = Utilities.parseInt(req.params.id, 1);
 
@@ -43,9 +46,11 @@ class UserController {
             return res.status(STATUS_BAD_REQUEST).json(err)
         }
     }
+}
 
-    // Create user
-    async create(req, res, next) {
+// Create user
+module.exports.createUser = function createUser(appContext) {
+    return async (req, res, next) => {
         try {
             const body = req.body;
 
@@ -62,9 +67,11 @@ class UserController {
             return res.status(STATUS_BAD_REQUEST).json(err)
         }
     }
+}
 
-    // Update user
-    async update(req, res, next) {
+// Update user
+module.exports.updateUser = function updateUser(appContext) {
+    return async (req, res, next) => {
         try {
             const body = req.body;
             const id = Utilities.parseInt(req.params.id, 1);
@@ -83,9 +90,11 @@ class UserController {
             return res.status(STATUS_BAD_REQUEST).json(err)
         }
     }
+}
 
-    // Delete user
-    async delete(req, res, next) {
+// Delete user
+module.exports.deleteUser = function deleteUser(appContext) {
+    return async (req, res, next) => {
         try {
             const id = req.params.id;
 
@@ -102,9 +111,11 @@ class UserController {
             return res.status(STATUS_BAD_REQUEST).json(err)
         }
     }
+}
 
-    // Register user
-    async register(req, res, next) {
+// Register user
+module.exports.registerUser = function registerUser(appContext) {
+    return async (req, res, next) => {
         try {
             const body = req.body;
 
@@ -117,10 +128,13 @@ class UserController {
             return res.status(STATUS_BAD_REQUEST).json(err)
         }
     }
+}
 
-    // Ping user
-    async ping(req, res, next) {
+// Ping user
+module.exports.pingUser = function pingUser(appContext) {
+    return async (req, res, next) => {
         try {
+            console.log(appContext);
             let userHandler = new UserHandler();
             let result = await userHandler.ping()
             console.log(result);
@@ -131,4 +145,3 @@ class UserController {
         }
     }
 }
-module.exports = new UserController();
