@@ -75,8 +75,8 @@ class UserHandler extends BaseHandler {
         }
     }
 
-    async ping() {
-        return await this.userService.ping();
+    async ping(appContext) {
+        return await this.userService.ping(appContext);
     }
 }
 

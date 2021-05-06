@@ -7,12 +7,15 @@ const middlewareController = require("../middleware/authorize");
 
 module.exports = function setupRouter(appContext) {
     // register
-    router.post("/api/v1/register", userController.registerUser(appContext))
+    // router.post("/api/v1/register", userController.registerUser(appContext))
     // login
     router.post("/api/v1/login", authenController.login(appContext))
     // user
-    router.use("/api/v1/users", middlewareController.authorize, users(appContext))
+    // router.use("/api/v1/users", middlewareController.authorize, users(appContext))
     // register
     router.get("/api/v1/ping", userController.pingUser(appContext))
     return router;
 }
+
+
+// module.exports = router.get("/api/v1/ping", userController.pingUser)

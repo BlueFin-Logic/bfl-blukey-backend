@@ -1,44 +1,42 @@
 'use strict';
 
 const dotenv = require('dotenv');
-
 dotenv.config();
 
-const {
-    PORT,
-    HOST,
-    HOST_URL,
-    SQL_USER,
-    SQL_PASSWORD,
-    SQL_DATABASE,
-    SQL_SERVER,
-    ISSUER,
-    SUBJECT,
-    AUDIENCE,
-    ALGORITHM,
-    TOKEN_SECRET,
-    EXPIRES_IN,
-} = process.env;
-
-const sqlEncrypt = process.env.SQL_ENCRYPT === "true";
-const sqlTrustServerCertificate = process.env.SQL_TRUST_SERVER_CERTIFICATE === "true";
+const PORT = process.env.PORT;
+const HOST = process.env.HOST;
+const HOST_URL = process.env.HOST_URL;
+const SQL_USER = process.env.SQL_USER;
+const SQL_PASSWORD = process.env.SQL_PASSWORD;
+const SQL_DATABASE = process.env.SQL_DATABASE;
+const SQL_SERVER = process.env.SQL_SERVER;
+const ISSUER = process.env.ISSUER;
+const SUBJECT = process.env.SUBJECT;
+const AUDIENCE = process.env.AUDIENCE;
+const ALGORITHM = process.env.ALGORITHM;
+const TOKEN_SECRET = process.env.TOKEN_SECRET;
+const EXPIRES_IN = process.env.EXPIRES_IN;
+const SQL_ENCRYPT = process.env.SQL_ENCRYPT === "true";
+const SQL_TRUST_SERVER_CERTIFICATE = process.env.SQL_TRUST_SERVER_CERTIFICATE === "true";
 
 
 module.exports = {
     port: PORT,
     host: HOST,
     url: HOST_URL,
-    sql: {
+    configMSSQL: {
         user: SQL_USER,
         password: SQL_PASSWORD,
         server: SQL_SERVER,
         database: SQL_DATABASE,
+        connectionTimeout: 15000,
+        parseJSON: true,
         options: {
-            encrypt: sqlEncrypt,
-            trustServerCertificate: sqlTrustServerCertificate
-        },
+            encrypt: SQL_ENCRYPT, // for azure
+            trustServerCertificate: SQL_TRUST_SERVER_CERTIFICATE // change to true for local dev / self-signed certs
+        }
     },
-    token: {
+    tokenJWT: {
         issuer: ISSUER,
         subject: SUBJECT,
         audience: AUDIENCE,

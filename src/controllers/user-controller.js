@@ -136,7 +136,7 @@ module.exports.pingUser = function pingUser(appContext) {
         try {
             console.log(appContext);
             let userHandler = new UserHandler();
-            let result = await userHandler.ping()
+            let result = await userHandler.ping(appContext)
             console.log(result);
             return res.status(STATUS_OK).json(result)
         } catch (err) {
@@ -145,3 +145,16 @@ module.exports.pingUser = function pingUser(appContext) {
         }
     }
 }
+// // Ping user
+// module.exports.pingUser = async function pingUser(appContext, req, res, next) {
+//     try {
+//         console.log(appContext);
+//         let userHandler = new UserHandler();
+//         let result = await userHandler.ping(appContext)
+//         console.log(result);
+//         return res.status(STATUS_OK).json(result)
+//     } catch (err) {
+//         console.log(err);
+//         return res.status(STATUS_BAD_REQUEST).json(err)
+//     }
+// }

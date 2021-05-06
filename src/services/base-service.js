@@ -5,6 +5,7 @@ const { BaseModel } = require('../model/table');
 
 class BaseService {
     constructor(table) {
+        this.poolMSSQL = null;
         this.table = table;
 
         // this.config = {
@@ -21,15 +22,15 @@ class BaseService {
         // this.connectString = `Server=tcp:${this.config.server},1433;Initial Catalog=${this.config.database};Persist Security Info=False;User ID=${this.config.user};Password=${this.config.password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;`;
 
         this.connectString = {
-            user: config.sql.user,
-            password: config.sql.password,
-            server: config.sql.server,
-            database: config.sql.database,
+            user: config.configMSSQL.user,
+            password: config.configMSSQL.password,
+            server: config.configMSSQL.server,
+            database: config.configMSSQL.database,
             connectionTimeout: 15000,
             parseJSON: true,
             options: {
-                encrypt: config.sql.options.encrypt, // for azure
-                trustServerCertificate: config.sql.options.trustServerCertificate // change to true for local dev / self-signed certs
+                encrypt: config.configMSSQL.options.encrypt, // for azure
+                trustServerCertificate: config.configMSSQL.options.trustServerCertificate // change to true for local dev / self-signed certs
             }
         }
     }
@@ -44,6 +45,34 @@ class BaseService {
     //         throw err;
     //     }
     // }
+
+    async createConnectSQL(config) {
+        try {
+            return await sql.connect(config);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
+    requestSQL(pool) {
+        try {
+            return new sql.Request(pool);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
+    transactionSQL(pool) {
+        try {
+            return new sql.Transaction(pool);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
 
     async connect() {
         try {

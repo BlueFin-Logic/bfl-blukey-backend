@@ -3,13 +3,13 @@ const jwt = require('jsonwebtoken');
 
 class TokenService {
     constructor() {
-        this.token_secret = config.token.token_secret;
+        this.token_secret = config.tokenJWT.token_secret;
         this.options = {
-            issuer: config.token.issuer,
-            subject: config.token.subject,
-            audience: config.token.audience,
-            algorithm: config.token.algorithm,
-            expiresIn: config.token.expiresIn
+            issuer: config.tokenJWT.issuer,
+            subject: config.tokenJWT.subject,
+            audience: config.tokenJWT.audience,
+            algorithm: config.tokenJWT.algorithm,
+            expiresIn: config.tokenJWT.expiresIn
         }
     }
 

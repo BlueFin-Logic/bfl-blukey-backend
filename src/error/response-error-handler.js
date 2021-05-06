@@ -1,6 +1,6 @@
 const CommonError = require('../common/error');
 
-function errorHandler(err, req, res, next) {
+function responseErrorHandler(err, req, res, next) {
     // in prod, don't use console.log or console.err because
     // it is not async
     console.error(err);
@@ -10,7 +10,7 @@ function errorHandler(err, req, res, next) {
         return;
     }
 
-    res.status(500).json({ message: 'something went wrong.' });
+    res.status(500).json({ message: 'lam cus something went wrong.' });
 }
 
-module.exports = errorHandler;
+module.exports = responseErrorHandler;
