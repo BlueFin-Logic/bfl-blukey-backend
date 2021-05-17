@@ -1,32 +1,64 @@
-const BaseService = require('../services/base-service');
-const { BaseModel } = require('../model/table');
+// const BaseService = require('../services/base-service');
+const CustomError = require('../response_error/error');
+const BaseModel = require('../model/base');
 
 class BaseHandler {
-    constructor(containerID) {
-        this.baseService = new BaseService(containerID);
+    constructor(service, table) {
+        this.service = service;
+        this.table = table;
     }
 
     async getAll(page, limit) {
-        let fields = "*"
-        return await this.baseService.getAll(page, limit, fields);
+        try {
+            let fields = "*";
+            let users = await this.service.getAll(page, limit, fields);
+            return users;
+        } catch (err) {
+            if (err instanceof CustomError) throw err;
+            throw CustomError.cannotListEntity(`${this.table} Handler`, this.table, err);
+        }
     }
 
     async getById(data) {
-        let fields = "*"
-        let condition = `${BaseModel.column_id} = ${data}`
-        return await this.baseService.getByCondition(fields, condition);
+        try {
+            let fields = "*";
+            let condition = `${BaseModel.id} = ${data}`;
+            let user = await this.service.getByCondition(fields, condition);
+            return user;
+        } catch (err) {
+            if (err instanceof CustomError) throw err;
+            throw CustomError.cannotGetEntity(`${this.table} Handler`, this.table, err);
+        }
     }
 
-    async addItem(item) {
-        return await this.baseService.addItem(item);
+    async addItem(data) {
+        try {
+            let user = await this.service.addItem(data);
+            return user;
+        } catch (err) {
+            if (err instanceof CustomError) throw err;
+            throw CustomError.cannotCreateEntity(`${this.table} Handler`, this.table, err);
+        }
     }
 
-    async updateItem(id, item) {
-        return await this.baseService.updateItem(id, item);
+    async updateItem(id, data) {
+        try {
+            let user = await this.service.updateItem(id, data);
+            return user;
+        } catch (err) {
+            if (err instanceof CustomError) throw err;
+            throw CustomError.cannotUpdateEntity(`${this.table} Handler`, this.table, err);
+        }
     }
 
     async deleteItem(id) {
-        return await this.baseService.deleteItem(id);
+        try {
+            let user = await this.service.deleteItem(id);
+            return user;
+        } catch (err) {
+            if (err instanceof CustomError) throw err;
+            throw CustomError.deleteItem(`${this.table} Handler`, this.table, err);
+        }
     }
 }
 

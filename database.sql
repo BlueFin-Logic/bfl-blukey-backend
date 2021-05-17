@@ -1,3 +1,9 @@
+drop database blukey
+
+create database blukey
+
+USE [BluKey-SQL]
+
 drop table [Users]
 go
 drop table [Documents]
@@ -87,8 +93,16 @@ SELECT * FROM [Users] WHERE "first_name" = 'Lam'
 
 SELECT *
 FROM [Users]
+WHERE [first_name] like 'Nathan'
 ORDER BY id ASC
-OFFSET 12 ROWS
+OFFSET 0 ROWS
+FETCH NEXT 1 ROWS ONLY
+
+SELECT *
+FROM [Users]
+
+ORDER BY [updated_at] DESC
+OFFSET 0 ROWS
 FETCH NEXT 4 ROWS ONLY
 
 
@@ -111,3 +125,16 @@ SELECT * FROM [Test]
 drop table [Test]
 
 JSON_QUERY
+
+SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON UPDATE [Users]
+SET [created_at] = '2021-05-11 04:09:37.768',[updated_at] = '2021-05-11 04:09:37.768',[first_name] = 'undefined',[last_name] = 'undefined',[email] = 'undefined',[address] = 'undefined',[username] = 'vincen',[password] = 'AY9t5vmr43WZSjN6pUlNCg==',[salt] = '$2b$15$gsqbGw14lcWj6ycGB38r4u',[is_admin] = 'NaN',[is_deleted] = 'NaN',[last_login_date] = '2021-05-11 04:09:38.180'
+WHERE [id] = 5
+
+SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON 
+UPDATE [Users]
+SET [created_at] = '2021-05-11 04:17:44.411',[updated_at] = '2021-05-11 04:17:44.411',[first_name] = NULL,[last_name] = NULL,[email] = NULL,[address] = NULL,[username] = 'vincen',[password] = '3rwuMekA5u3ohN3hPnxUag==',[salt] = '$2b$15$OlJC.zLo81kcrjQP23mm1.',[is_admin] = NULL,[is_deleted] = NULL,[last_login_date] = '2021-05-11 04:17:44.783'
+WHERE [id] = 5
+
+SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON UPDATE [Users]
+SET [created_at] = '"2021-05-11T04:21:46.357Z"',[updated_at] = '2021-05-11 04:26:14.390',[username] = 'vincen',[password] = 'AIloQ6IG2UyBICZ8bbivUw==',[salt] = '$2b$15$XBndOPpC3bxsb7y/eJWpt.',[last_login_date] = '"2021-05-11T04:21:46.757Z"'
+WHERE [id] = 5

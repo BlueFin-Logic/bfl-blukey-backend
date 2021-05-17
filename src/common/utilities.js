@@ -34,15 +34,15 @@ class Utilities {
         return (p != null && typeof p === 'object');
     }
 
-    responsePaging(data, page, limit) {
-        return {
-            data: data,
-            paging: {
-                page: page,
-                total: limit
-            }
-        };
-    }
+    // responsePaging(data, page, limit) {
+    //     return {
+    //         data: data,
+    //         paging: {
+    //             page: page,
+    //             total: limit
+    //         }
+    //     };
+    // }
 
     responseSimple(message) {
         return {

@@ -3,7 +3,7 @@ const UserService = require('../services/user-service');
 const { HashService } = require('../common/hash');
 const { TokenService } = require('../common/token');
 const { Utilities } = require('../common/utilities');
-const { UserModel } = require('../model/table');
+const UserModel = require('../model/user');
 const TABLE_USER = UserModel.tableName
 
 class AuthenHandler extends BaseHandler {

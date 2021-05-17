@@ -1,17 +1,25 @@
-const bcrypt = require('bcrypt');
+let bcrypt = require('bcrypt');
 const objectHash = require('object-hash');
 
 class HashService {
     constructor() {
     }
 
-    async genSalt(length) {
-        return await bcrypt.genSalt(length);
+    genSalt(length) {
+        try {
+            return bcrypt.genSaltSync(length);
+        } catch (err) {
+            throw err;
+        }
     }
 
     hashMD5(data) {
-        return objectHash(data, { algorithm: 'md5', encoding: 'base64' });
+        try {
+            return objectHash(data, { algorithm: 'md5', encoding: 'base64' });
+        } catch (err) {
+            throw err;
+        }
     }
 }
 
-module.exports.HashService = new HashService();
+module.exports = HashService;

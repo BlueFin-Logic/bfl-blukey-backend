@@ -1,26 +1,42 @@
 const UserHandler = require('../handlers/user-handler')
+const UserService = require('../services/user-service')
+const CustomResponse = require('../response_error/response')
+const CustomError = require('../response_error/error')
+const UserModel = require('../model/user')
+const HashService = require('../common/hash')
 const { Utilities } = require('../common/utilities')
-const { STATUS_OK, STATUS_CREATED, STATUS_BAD_REQUEST, STATUS_FORBIDDEN } = require('../common/statusResponse')
+// const { STATUS_OK, STATUS_CREATED, STATUS_BAD_REQUEST, STATUS_FORBIDDEN } = require('../common/statusResponse')
 
 // Get All Users
 module.exports.listUser = function listUser(appContext) {
     return async (req, res, next) => {
         try {
-            console.log(appContext);
             const page = Utilities.parseInt(req.query.page, 1);
-            const limit = Utilities.parseInt(req.query.limit, 10);
+            const limit = Utilities.parseInt(req.query.limit, 100);
 
-            // Only admin can get all
-            const is_admin = req.currentUserRole;
-            if (!is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
+            // // Only admin can get all
+            // const is_admin = req.currentUserRole;
+            // if (!is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let userHandler = new UserHandler();
-            let result = await userHandler.getAll(page, limit)
-            console.log(result);
-            return res.status(STATUS_OK).json(result)
+            let db = appContext.getPoolMSSQL;
+            // appContext.resolve(data => {
+            //     let db = data.getPoolMSSQL;
+            //     let lam = ""
+            // });
+            let service = new UserService(db);
+            let handler = new UserHandler(service);
+
+            let data = await handler.getAll(page, limit);
+
+            let paging = {
+                page: page,
+                total: data.length
+            }
+
+            next(CustomResponse.newSuccessResponse(`${UserModel.tableName} Controller`, `Get list users successful.`, data, paging))
         } catch (err) {
-            console.log(err);
-            return res.status(STATUS_BAD_REQUEST).json(err)
+            if (err instanceof CustomError) next(err);
+            else next(CustomError.cannotListEntity(`${UserModel.tableName} Controller`, `${UserModel.tableName}`, err));
         }
     }
 }
@@ -31,19 +47,21 @@ module.exports.getByIdUser = function getByIdUser(appContext) {
         try {
             const id = Utilities.parseInt(req.params.id, 1);
 
-            let userHandler = new UserHandler();
-
             // Only user can get data yourseft or admin
-            const currentUserId = req.currentUserId;
-            const is_admin = req.currentUserRole;
-            if (currentUserId !== id && !is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
+            // const currentUserId = req.currentUserId;
+            // const is_admin = req.currentUserRole;
+            // if (currentUserId !== id && !is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let result = await userHandler.getById(id)
-            console.log(result);
-            return res.status(STATUS_OK).json(result)
+            let db = appContext.getPoolMSSQL;
+            let service = new UserService(db);
+            let handler = new UserHandler(service);
+
+            let data = await handler.getById(id);
+
+            next(CustomResponse.newSimpleResponse(`${UserModel.tableName} Controller`, `Get users by id successful.`, data))
         } catch (err) {
-            console.log(err);
-            return res.status(STATUS_BAD_REQUEST).json(err)
+            if (err instanceof CustomError) next(err);
+            else next(CustomError.cannotGetEntity(`${UserModel.tableName} Controller`, `${UserModel.tableName}`, err));
         }
     }
 }
@@ -55,16 +73,19 @@ module.exports.createUser = function createUser(appContext) {
             const body = req.body;
 
             // Only admin can create
-            const is_admin = req.currentUserRole;
-            if (!is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
+            // const is_admin = req.currentUserRole;
+            // if (!is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let userHandler = new UserHandler();
-            let result = await userHandler.addItem(body)
-            console.log(result);
-            return res.status(STATUS_CREATED).json(result)
+            let db = appContext.getPoolMSSQL;
+            let service = new UserService(db);
+            let handler = new UserHandler(service);
+            let hash = new HashService();
+
+            let data = await handler.addItem(body, hash);
+            next(CustomResponse.newSimpleResponse(`${UserModel.tableName} Controller`, `Create user successful.`, data))
         } catch (err) {
-            console.log(err);
-            return res.status(STATUS_BAD_REQUEST).json(err)
+            if (err instanceof CustomError) next(err);
+            else next(CustomError.cannotCreateEntity(`${UserModel.tableName} Controller`, `${UserModel.tableName}`, err));
         }
     }
 }
@@ -77,17 +98,20 @@ module.exports.updateUser = function updateUser(appContext) {
             const id = Utilities.parseInt(req.params.id, 1);
 
             // Only user can edit data yourseft or admin
-            const currentUserId = req.currentUserId;
-            const is_admin = req.currentUserRole;
-            if (currentUserId !== id && !is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
+            // const currentUserId = req.currentUserId;
+            // const is_admin = req.currentUserRole;
+            // if (currentUserId !== id && !is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let userHandler = new UserHandler();
-            let result = await userHandler.updateItem(id, body)
-            console.log(result);
-            return res.status(STATUS_CREATED).json(result)
+            let db = appContext.getPoolMSSQL;
+            let service = new UserService(db);
+            let handler = new UserHandler(service);
+            let hash = new HashService();
+
+            let data = await handler.updateItem(id, body, hash);
+            next(CustomResponse.newSimpleResponse(`${UserModel.tableName} Controller`, `Update user successful.`, data))
         } catch (err) {
-            console.log(err);
-            return res.status(STATUS_BAD_REQUEST).json(err)
+            if (err instanceof CustomError) next(err);
+            else next(CustomError.cannotCreateEntity(`${UserModel.tableName} Controller`, `${UserModel.tableName}`, err));
         }
     }
 }
@@ -134,7 +158,7 @@ module.exports.registerUser = function registerUser(appContext) {
 module.exports.pingUser = function pingUser(appContext) {
     return async (req, res, next) => {
         try {
-            console.log(appContext);
+            // console.log(appContext);
             let userHandler = new UserHandler();
             let result = await userHandler.ping(appContext)
             console.log(result);
@@ -145,16 +169,3 @@ module.exports.pingUser = function pingUser(appContext) {
         }
     }
 }
-// // Ping user
-// module.exports.pingUser = async function pingUser(appContext, req, res, next) {
-//     try {
-//         console.log(appContext);
-//         let userHandler = new UserHandler();
-//         let result = await userHandler.ping(appContext)
-//         console.log(result);
-//         return res.status(STATUS_OK).json(result)
-//     } catch (err) {
-//         console.log(err);
-//         return res.status(STATUS_BAD_REQUEST).json(err)
-//     }
-// }

@@ -33,7 +33,8 @@ module.exports = {
         parseJSON: true,
         options: {
             encrypt: SQL_ENCRYPT, // for azure
-            trustServerCertificate: SQL_TRUST_SERVER_CERTIFICATE // change to true for local dev / self-signed certs
+            trustServerCertificate: SQL_TRUST_SERVER_CERTIFICATE, // change to true for local dev / self-signed certs
+            enableArithAbort: true
         }
     },
     tokenJWT: {
@@ -45,3 +46,18 @@ module.exports = {
         expiresIn: EXPIRES_IN,
     },
 };
+
+// SQL_USER=lamnguyen
+// SQL_PASSWORD=Thanhnam0
+// SQL_DATABASE=blukey
+// SQL_SERVER=bluefinlogic.database.windows.net
+// SQL_ENCRYPT=true
+// SQL_TRUST_SERVER_CERTIFICATE=true
+
+// #sql server config
+// SQL_USER=blukey
+// SQL_PASSWORD=Nathan01
+// SQL_DATABASE=BluKey-SQL
+// SQL_SERVER=blukey-sql.database.windows.net
+// SQL_ENCRYPT=true
+// SQL_TRUST_SERVER_CERTIFICATE=true
