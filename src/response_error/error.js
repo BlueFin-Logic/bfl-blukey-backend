@@ -13,7 +13,7 @@ class CustomError extends Error {
         return new Error(this.message);
     };
 
-    get getRooError(){
+    get getRooError() {
         return {
             name: this.rootError?.name.toString(),
             message: this.rootError?.message.toString(),
@@ -49,7 +49,7 @@ class CustomError extends Error {
     static cannotListEntity(namespace, entity, rootError = null) {
         return new CustomError(namespace, 400, `Cannot list entity: ${entity}.`, rootError);
     }
-    
+
     static cannotGetEntity(namespace, entity, rootError = null) {
         return new CustomError(namespace, 400, `Cannot get entity: ${entity}.`, rootError);
     }
