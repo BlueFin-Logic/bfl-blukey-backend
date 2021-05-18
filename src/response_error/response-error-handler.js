@@ -2,9 +2,8 @@ const CustomError = require('./error');
 const CustomResponse = require('./response');
 
 async function responseErrorHandler(data, req, res, next) {
-    // in prod, don't use console.log or console.err because
-    // it is not async
-    // console.error(err);
+    // next is required
+    // in prod, don't use console.log or console.err because it is not async
     if (data instanceof CustomResponse) {
         res.status(data.code).json({
             name: data.name,
