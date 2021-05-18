@@ -1,7 +1,7 @@
 const DB = require('../database/db');
 const BaseModel = require('../model/base');
 const CustomError = require('../response_error/error');
-const { Utilities } = require('../common/utilities');
+const {Utilities} = require('../common/utilities');
 
 class BaseService {
     constructor(connection, table) {
@@ -84,10 +84,14 @@ class BaseService {
             // Get ID inserted successfully and return
             result = result.recordsets[0];
             return result[0]
-        }
-        catch (err) {
-            await transaction.rollback();
-            throw CustomError.cannotCreateEntity(`${this.table} Service`, this.table, err);
+        } catch (err) {
+            return transaction.rollback()
+                .then(value => {
+                    throw CustomError.cannotCreateEntity(`${this.table} Service`, this.table, err);
+                })
+                .catch(reason => {
+                    throw CustomError.cannotCreateEntity(`${this.table} Service`, this.table, err);
+                });
         }
     }
 
@@ -97,6 +101,7 @@ class BaseService {
             await transaction.begin();
             const req = DB.requestSQL(transaction);
             let buildCommand = [];
+            // request.input('offset', sql.Int, offset)
             for (const [key, value] of Object.entries(item)) {
                 if (value) {
                     let _value = value;
@@ -118,10 +123,14 @@ class BaseService {
             // Get ID updated successfully and return
             result = result.recordsets[0];
             return result;
-        }
-        catch (err) {
-            await transaction.rollback();
-            throw CustomError.cannotUpdateEntity(`${this.table} Service`, this.table, err);
+        } catch (err) {
+            return transaction.rollback()
+                .then(value => {
+                    throw CustomError.cannotUpdateEntity(`${this.table} Service`, this.table, err);
+                })
+                .catch(reason => {
+                    throw CustomError.cannotUpdateEntity(`${this.table} Service`, this.table, err);
+                });
         }
     }
 
@@ -152,4 +161,5 @@ class BaseService {
     //     }
     // }
 }
+
 module.exports = BaseService;

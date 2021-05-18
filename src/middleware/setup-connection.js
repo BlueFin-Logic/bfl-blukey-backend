@@ -24,11 +24,11 @@ const responseErrorHandler = require("../response_error/response-error-handler.j
 
 module.exports = async function setupConnection(appContext) {
     try {
-        // let [pool] = await Promise.all([DB.connectDB(config.configMSSQL)]);
-        let pool = await DB.connectDB(config.configMSSQL);
+        let [pool] = await Promise.all([DB.connectDB(config.configMSSQL)]);
+        // let pool = await DB.connectDB(config.configMSSQL);
         appContext.setPoolMSSQL = pool;
 
-        app.use(express.urlencoded({ extended: true }))
+        app.use(express.urlencoded({extended: true}))
         app.use(express.json())
 
         // setup routes index
@@ -38,7 +38,7 @@ module.exports = async function setupConnection(appContext) {
         app.use(responseErrorHandler);
 
         app.listen(config.port, () => {
-            console.log(`server started at http://localhost:${config.port}`);
+            console.log(`Server started at http://localhost:${config.port}`);
         });
     } catch (err) {
         if (err instanceof CustomError) console.log(err);

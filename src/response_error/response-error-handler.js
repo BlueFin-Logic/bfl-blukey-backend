@@ -27,7 +27,7 @@ async function responseErrorHandler(data, req, res, next) {
         })
         return;
     }
-    res.status(500).json({ message: 'Something went wrong. Please check ErrorHandler.' });
+    res.status(500).json({message: 'Something went wrong. Please check ErrorHandler.'});
 }
 
 module.exports = responseErrorHandler;
