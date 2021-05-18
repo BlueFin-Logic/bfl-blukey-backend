@@ -24,7 +24,7 @@ class BaseService {
                                 ORDER BY ${BaseModel.updated_at} DESC
                                 OFFSET ${offset} ROWS
                                 FETCH NEXT ${limit} ROWS ONLY`;
-            
+
             let request = DB.requestSQL(this.connection)
             // let request = DB.requestSQL(null)
             // request.input('offset', sql.Int, offset)
@@ -118,11 +118,10 @@ class BaseService {
             let queryStatement = `SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON UPDATE ${this.table} 
                                     SET ${buildCommand.join(",")} 
                                     WHERE ${BaseModel.id} = ${id}`;
-            let result = await req.query(queryStatement);
+            await req.query(queryStatement);
             await transaction.commit();
             // Get ID updated successfully and return
-            result = result.recordsets[0];
-            return result;
+            return {id: id};
         } catch (err) {
             return transaction.rollback()
                 .then(value => {
