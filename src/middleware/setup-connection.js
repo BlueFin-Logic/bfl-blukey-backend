@@ -6,20 +6,6 @@ const routes = require("../routes/index");
 const responseErrorHandler = require("../response_error/response-error-handler.js");
 const CustomError = require('../response_error/error');
 
-// module.exports = function setupConnection(appContext) {
-//     return async (req, res, next) => {
-//         try {
-//             let [pool] = await Promise.all([DB.connectDB(config.configMSSQL)]);
-//             appContext.createPoolMSSQL = pool;
-//             next();
-//         } catch (err) {
-//             if (err instanceof CustomError) next(err);
-//             else next(CustomError.badRequest("Setup Connection", "Can not setup connection with services.", err));
-//             // return next(err) because data before req just passing function, not router
-//         }
-//     }
-// }
-
 module.exports = async function setupConnection(appContext) {
     try {
         let [pool] = await Promise.all([DB.connectDB(config.configMSSQL)]);
@@ -49,6 +35,8 @@ module.exports = async function setupConnection(appContext) {
     } catch (err) {
         if (err instanceof CustomError) console.log(err);
         console.log(CustomError.badRequest("Setup Connection", "Can not setup connection with services.", err));
+        // if (err instanceof CustomError) next(err);
+        // else next(CustomError.badRequest("Setup Connection", "Can not setup connection with services.", err));
         // return next(err) because data before req just passing function, not router
     }
 }
