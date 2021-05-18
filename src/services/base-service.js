@@ -101,7 +101,6 @@ class BaseService {
             await transaction.begin();
             const req = DB.requestSQL(transaction);
             let buildCommand = [];
-            // request.input('offset', sql.Int, offset)
             for (const [key, value] of Object.entries(item)) {
                 if (value) {
                     let _value = value;

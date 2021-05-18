@@ -19,10 +19,6 @@ module.exports.listUser = function listUser(appContext) {
             // if (!is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
             let db = appContext.getPoolMSSQL;
-            // appContext.resolve(data => {
-            //     let db = data.getPoolMSSQL;
-            //     let lam = ""
-            // });
             let service = new UserService(db);
             let handler = new UserHandler(service);
 
