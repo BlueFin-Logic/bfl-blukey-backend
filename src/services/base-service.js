@@ -85,13 +85,12 @@ class BaseService {
             result = result.recordsets[0];
             return result[0]
         } catch (err) {
-            return transaction.rollback()
-                .then(value => {
-                    throw CustomError.cannotCreateEntity(`${this.table} Service`, this.table, err);
-                })
-                .catch(reason => {
-                    throw CustomError.cannotCreateEntity(`${this.table} Service`, this.table, err);
-                });
+            try {
+                await transaction.rollback();
+                throw CustomError.cannotCreateEntity(`${this.table} Service`, this.table, err);
+            } catch (errTrans) {
+                throw CustomError.cannotCreateEntity(`${this.table} Service`, this.table, err);
+            }
         }
     }
 
@@ -122,13 +121,12 @@ class BaseService {
             // Get ID updated successfully and return
             return {id: id};
         } catch (err) {
-            return transaction.rollback()
-                .then(value => {
-                    throw CustomError.cannotUpdateEntity(`${this.table} Service`, this.table, err);
-                })
-                .catch(reason => {
-                    throw CustomError.cannotUpdateEntity(`${this.table} Service`, this.table, err);
-                });
+            try {
+                await transaction.rollback();
+                throw CustomError.cannotUpdateEntity(`${this.table} Service`, this.table, err);
+            } catch (errTrans) {
+                throw CustomError.cannotUpdateEntity(`${this.table} Service`, this.table, err);
+            }
         }
     }
 
