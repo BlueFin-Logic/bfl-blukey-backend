@@ -1,38 +1,44 @@
 const BaseHandler = require('./base-handler');
-const UserService = require('../services/user-service');
-const { HashService } = require('../common/hash');
-const { TokenService } = require('../common/token');
-const { Utilities } = require('../common/utilities');
+const CustomError = require('../response_error/error');
+const {Utilities} = require('../common/utilities');
 const UserModel = require('../model/user');
 const TABLE_USER = UserModel.tableName
 
 class AuthenHandler extends BaseHandler {
-    constructor() {
-        super(TABLE_USER);
-        this.userService = new UserService();
+    constructor(service) {
+        super(service, TABLE_USER);
     }
 
-    async login(item) {
+    async login(item, token, hash) {
         try {
-            let email = item.email;
+            let username = item.username;
             let password = item.password;
 
-            let fields = `${UserModel.column_id},${UserModel.column_salt},${UserModel.column_password},${UserModel.column_is_admin}`;
-            let condition = `${UserModel.column_email} = '${item.email}'`;
-            
-            let user = await this.userService.getByCondition(fields, condition);
+            let fields = `${UserModel.id},
+                            ${UserModel.email}, 
+                            ${UserModel.password}, 
+                            ${UserModel.salt}, 
+                            ${UserModel.is_admin}`;
+            let condition = `${UserModel.username} = '${username}' AND ${UserModel.is_deleted} = 0`;
 
-            if (Utilities.isEmpty(user)) return "Email is not found!"
-            let passwordHash = HashService.hashMD5(password + user.salt)
-            if (passwordHash !== user.password) return "Invalid password."
+            let userExist = await this.service.getByCondition(fields, condition);
+
+            if (Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "Username not found!");
+
+            if (userExist.password !== hash.hashMD5(password + userExist.salt)) throw CustomError.badRequest(`${this.table} Handler`, "Invalid password!");
+
             let data = {
-                id: user.id,
-                is_admin: user.is_admin
+                id: userExist.id,
+                is_admin: userExist.is_admin
             }
-            let token = TokenService.sign(data, email);
-            return token
-        } catch (error) {
-            throw error
+
+            return {
+                access_token: token.sign(data, userExist.email),
+                refresh_token: token.sign(data, userExist.email, "30 days")
+            }
+        } catch (err) {
+            if (err instanceof CustomError) throw err;
+            throw CustomError.unauthorized(`Authen Handler`, `Unauthorized`, err);
         }
     }
 }

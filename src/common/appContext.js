@@ -1,9 +1,6 @@
 class AppContext {
     #poolMSSQL = null;
-    constructor() {
-        // this.tokenJWT = tokenJWT;
-        this.#poolMSSQL = null;
-    }
+    #tokenJWT = null;
 
     set setPoolMSSQL(poolMSSQL){
         this.#poolMSSQL = poolMSSQL;
@@ -11,6 +8,14 @@ class AppContext {
 
     get getPoolMSSQL(){
         return this.#poolMSSQL;
+    }
+
+    set setTokenJWT(tokenJWT){
+        this.#tokenJWT = tokenJWT;
+    }
+
+    get getTokenJWT(){
+        return this.#tokenJWT;
     }
 }
 

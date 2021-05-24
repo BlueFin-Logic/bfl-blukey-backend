@@ -1,6 +1,6 @@
 const AppContext = require("./common/appContext");
-const setupConnection = require("./middleware/setup-connection");
+const setupConnection = require("./config/setup-connection");
 
-let appContext = new AppContext();
+const appContext = new AppContext();
 
-appContext = setupConnection(appContext);
+setupConnection(appContext)

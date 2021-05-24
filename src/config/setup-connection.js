@@ -1,26 +1,37 @@
 const express = require("express");
 const app = express();
-const config = require('../config');
+const config = require('./config');
 const DB = require('../database/db')
-const routes = require("../routes/index");
+const routes = require("../routes");
 const responseErrorHandler = require("../response_error/response-error-handler.js");
 const CustomError = require('../response_error/error');
+const TokenService = require('../common/token');
 
 module.exports = async function setupConnection(appContext) {
     try {
+        // Connect DB and create pool
         let [pool] = await Promise.all([DB.connectDB(config.configMSSQL)]);
         appContext.setPoolMSSQL = pool;
 
+        // Get setting token config
+        const token = config.tokenJWT.token_secret;
+        const options = {
+            issuer: config.tokenJWT.issuer,
+            subject: config.tokenJWT.subject,
+            audience: config.tokenJWT.audience,
+            algorithm: config.tokenJWT.algorithm,
+            expiresIn: config.tokenJWT.expiresIn
+        };
+        appContext.setTokenJWT = new TokenService(token, options);
+
         // check connection
-        // app.get("/test", (req, res) => {
-        //     // req.query
-        //     // res.status().json()
-        //     res.send("pong");
-        // });
+        app.get("/test", (req, res) => {
+            res.send("pong");
+        });
 
         // body parse
-        app.use(express.urlencoded({extended: true}))
-        app.use(express.json())
+        app.use(express.urlencoded({extended: true}));
+        app.use(express.json());
 
         // setup routes index
         app.use(routes(appContext));

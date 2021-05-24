@@ -2,9 +2,6 @@ let bcrypt = require('bcrypt');
 const objectHash = require('object-hash');
 
 class HashService {
-    constructor() {
-    }
-
     genSalt(length) {
         try {
             return bcrypt.genSaltSync(length);
@@ -22,4 +19,4 @@ class HashService {
     }
 }
 
-module.exports = HashService;
+module.exports.HashService = new HashService();

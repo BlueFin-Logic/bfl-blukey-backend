@@ -5,7 +5,6 @@ class CustomError extends Error {
         this.code = code;
         this.rootError = this.#findRootError(rootError);
         this.name = this.constructor.name;
-        // this.log = log;
     }
 
     #findRootError(rootError) {

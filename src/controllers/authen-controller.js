@@ -1,50 +1,25 @@
 const AuthenHandler = require('../handlers/authen-handler')
-const { Utilities } = require('../common/utilities')
-const { STATUS_OK, STATUS_CREATED, STATUS_BAD_REQUEST } = require('../common/statusResponse')
+const {HashService} = require('../common/hash')
+const CustomResponse = require('../response_error/response')
+const CustomError = require('../response_error/error')
+const UserModel = require('../model/user')
+const UserService = require('../services/user-service')
 
-// // Login user
-// module.exports.authenLoginController = async (req, res) => {
-//     try {
-//         const body = req.body;
-
-//         let authenService = new AuthenService();
-//         let result = await authenService.login(body)
-//         console.log(result);
-//         return res.status(STATUS_OK).json(Utilities.responseSimple(result))
-//     } catch (err) {
-//         console.log(err);
-//         return res.status(STATUS_BAD_REQUEST).json(err)
-//     }
-// }
-
-// class AuthenController {
-//     // Login user
-//     async login(req, res, next) {
-//         try {
-//             const body = req.body;
-
-//             let authenHandler = new AuthenHandler();
-//             let result = await authenHandler.login(body)
-//             console.log(result);
-//             return res.status(STATUS_OK).json(Utilities.responseSimple(result))
-//         } catch (err) {
-//             console.log(err);
-//             return res.status(STATUS_BAD_REQUEST).json(err)
-//         }
-//     }
-// }
 module.exports.login = function login(appContext) {
     return async (req, res, next) => {
         try {
             const body = req.body;
 
-            let authenHandler = new AuthenHandler();
-            let result = await authenHandler.login(body)
-            console.log(result);
-            return res.status(STATUS_OK).json(Utilities.responseSimple(result))
+            let db = appContext.getPoolMSSQL;
+            let token = appContext.getTokenJWT;
+            let service = new UserService(db);
+            let handler = new AuthenHandler(service);
+
+            let data = await handler.login(body, token, HashService);
+            next(CustomResponse.newSimpleResponse(`Authentication Controller`, `Login successful!`, data));
         } catch (err) {
-            console.log(err);
-            return res.status(STATUS_BAD_REQUEST).json(err)
+            if (err instanceof CustomError) next(err);
+            else next(CustomError.cannotGetEntity(`Authentication Controller`, `${UserModel.tableName}`, err));
         }
     }
 }

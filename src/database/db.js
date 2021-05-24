@@ -1,18 +1,6 @@
 const sql = require('mssql');
 
 class DB {
-    async createPoolMSSQL(){
-        try {
-            let [pool] = await Promise.all([DB.connectDB(config.configMSSQL)]);
-            appContext.createPoolMSSQL = pool;
-            next();
-        } catch (err) {
-            if (err instanceof CustomError) next(err);
-            else next(CustomError.badRequest("Setup Connection", "Can not setup connection with services.", err));
-            // return next(err) because data before req just passing function, not router
-        }
-    }
-    
     static connectDB(configMSSQL) {
         try {
             return sql.connect(configMSSQL);
@@ -32,6 +20,38 @@ class DB {
     static transactionSQL(pool) {
         try {
             return new sql.Transaction(pool);
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    static get number() {
+        try {
+            return sql.Int;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    static get string() {
+        try {
+            return sql.NVarChar;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    static get boolean() {
+        try {
+            return sql.Bit;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    static get date() {
+        try {
+            return sql.DateTime;
         } catch (err) {
             throw err;
         }

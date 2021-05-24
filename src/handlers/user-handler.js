@@ -1,9 +1,9 @@
 const BaseHandler = require('./base-handler');
 const CustomError = require('../response_error/error');
-const { Utilities } = require('../common/utilities');
+const {Utilities} = require('../common/utilities');
+const {HashService} = require('../common/hash');
 const UserModel = require('../model/user');
 const TABLE_USER = UserModel.tableName;
-const { Time } = require('../common/time');
 
 class UserHandler extends BaseHandler {
     constructor(service) {
@@ -54,22 +54,10 @@ class UserHandler extends BaseHandler {
 
             if (!Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "Email already exist!");
 
-            let salt = hash.genSalt(15);
-            let passwordHash = hash.hashMD5(data.password + salt);
+            data.salt = hash.genSalt(15);
+            data.password = hash.hashMD5(data.password + data.salt);
 
-            let user = new UserModel(
-                data.first_name,
-                data.last_name,
-                data.email,
-                data.address,
-                data.username,
-                passwordHash,
-                salt,
-                data.is_admin,
-                data.is_deleted,
-            );
-
-            let createdUser = await this.service.addItem(user);
+            let createdUser = await this.service.addItem(data);
             return createdUser;
         } catch (err) {
             if (err instanceof CustomError) throw err;
@@ -79,34 +67,48 @@ class UserHandler extends BaseHandler {
 
     async updateItem(id, data, hash) {
         try {
-            let fields = `${UserModel.id}, ${UserModel.created_at}, ${UserModel.last_login_date}`;
+            let fields = `${UserModel.id},
+                            ${UserModel.password}, 
+                            ${UserModel.salt}`;
             let condition = `${UserModel.id} = ${id} AND ${UserModel.is_deleted} = 0`;
             let userExist = await this.service.getByCondition(fields, condition);
 
             if (Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "User not exist!");
 
-            let salt = hash.genSalt(15);
-            let passwordHash = hash.hashMD5(data.password + salt);
+            if (data.oldPassword) {
+                if (userExist.password === hash.hashMD5(data.oldPassword + userExist.salt)) {
+                    data.salt = hash.genSalt(15);
+                    data.password = hash.hashMD5(data.password + data.salt);
+                } else {
+                    throw CustomError.badRequest(`${this.table} Handler`, "Password is not correct!");
+                }
+            } else {
+                data.password = null;
+            }
 
-            let user = new UserModel(
-                data.first_name,
-                data.last_name,
-                data.email,
-                data.address,
-                data.username,
-                passwordHash,
-                salt,
-                data.is_admin,
-                data.is_deleted,
-                Time.formatTimeToString(userExist.created_at),
-                Time.formatTimeToString(userExist.last_login_date)
-            );
-
-            let updatedUser = await this.service.updateItem(id, user);
+            let updatedUser = await this.service.updateItem(id, data);
             return updatedUser;
         } catch (err) {
             if (err instanceof CustomError) throw err;
             throw CustomError.cannotUpdateEntity(`${this.table} Handler`, this.table, err);
+        }
+    }
+
+    async deleteItem(id) {
+        try {
+            let fields = `${UserModel.id}`;
+            let condition = `${UserModel.id} = ${id} AND ${UserModel.is_deleted} = 0`;
+            let userExist = await this.service.getByCondition(fields, condition);
+
+            if (Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "User not exist!");
+            let data = {
+                "is_deleted": true
+            };
+            let user = await this.service.updateItem(id, data);
+            return user;
+        } catch (err) {
+            if (err instanceof CustomError) throw err;
+            throw CustomError.cannotDeleteEntity(`${this.table} Handler`, this.table, err);
         }
     }
 

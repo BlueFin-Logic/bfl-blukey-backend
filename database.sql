@@ -26,6 +26,22 @@ CREATE TABLE [Users] (
 go
 CREATE TABLE [Users] (
     [id] INT PRIMARY KEY IDENTITY (1, 1),
+    [first_name] VARCHAR (50) NULL,
+    [last_name] VARCHAR (50) NULL,
+	[email] VARCHAR (50) NULL,
+	[address] VARCHAR (100) NULL, 
+    [username] VARCHAR (50) NULL, 
+	[password] VARCHAR (255) NULL,
+	[salt] VARCHAR (255) NULL,
+	[is_admin] BIT DEFAULT 0, 
+	[is_deleted] BIT DEFAULT 0, 
+	[created_at] DATETIME NULL,
+	[updated_at] DATETIME NULL,
+	[last_login_date] DATETIME NULL,
+);
+go
+CREATE TABLE [Users] (
+    [id] INT PRIMARY KEY IDENTITY (1, 1),
     [first_name] VARCHAR (50) NOT NULL,
     [last_name] VARCHAR (50) NOT NULL,
 	[email] VARCHAR (50) NOT NULL,
@@ -60,7 +76,7 @@ INSERT INTO [Users] ([first_name],[last_name],[email],[address],[username],[pass
 VALUES ('Nathan','Nguyen','nathan@gmail.com','Us','nathan','QQV9maR9RLIh2CfSpTnUGw==','$2b$15$55yyKez0y1tqEe.pOIOIbO',1, '2021-05-03 12:37:34.373','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
 go
 INSERT INTO [Users] ([first_name],[last_name],[email],[address],[username],[password],[salt],[is_admin],[created_at],[updated_at],[last_login_date]) 
-VALUES ('Nhan','Nguyen','nhan@gmail.com','nhan','lam','D5SsAvX8FIkqCwQp+tdqxA==','$2b$15$BkH9RVfydKHI3pLl0BCg/e',1, '2021-05-03 12:37:34.373','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
+VALUES ('Nhan','Nguyen','nhan@gmail.com','nhan','lam','D5SsAvX8FIkqCwQp+tdqxA==','$2b$15$BkH9RVfydKHI3pLl0BCg/e',+1, '2021-05-03 12:37:34.373','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
 
 INSERT INTO [Documents] ([link],[user_id]) VALUES ('a.com','1')
 INSERT INTO [Documents] ([link],[user_id]) VALUES ('b.com','1')
@@ -133,8 +149,14 @@ WHERE [id] = 5
 SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON 
 UPDATE [Users]
 SET [created_at] = '2021-05-11 04:17:44.411',[updated_at] = '2021-05-11 04:17:44.411',[first_name] = NULL,[last_name] = NULL,[email] = NULL,[address] = NULL,[username] = 'vincen',[password] = '3rwuMekA5u3ohN3hPnxUag==',[salt] = '$2b$15$OlJC.zLo81kcrjQP23mm1.',[is_admin] = NULL,[is_deleted] = NULL,[last_login_date] = '2021-05-11 04:17:44.783'
-WHERE [id] = 5
+WHERE [id] = 3
 
-SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON UPDATE [Users]
+SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON 
+UPDATE [Users]
 SET [created_at] = '"2021-05-11T04:21:46.357Z"',[updated_at] = '2021-05-11 04:26:14.390',[username] = 'vincen',[password] = 'AIloQ6IG2UyBICZ8bbivUw==',[salt] = '$2b$15$XBndOPpC3bxsb7y/eJWpt.',[last_login_date] = '"2021-05-11T04:21:46.757Z"'
 WHERE [id] = 5
+
+SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON 
+                    UPDATE [Users] 
+                    SET [username] = @username,[password] = @password,[salt] = @salt 
+                    WHERE [id] = @[id]

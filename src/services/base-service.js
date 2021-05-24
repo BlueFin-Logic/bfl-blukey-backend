@@ -22,13 +22,14 @@ class BaseService {
                                 FROM ${this.table}
                                 ${conditions}
                                 ORDER BY ${BaseModel.updated_at} DESC
-                                OFFSET ${offset} ROWS
-                                FETCH NEXT ${limit} ROWS ONLY`;
+                                OFFSET @offset ROWS
+                                FETCH NEXT @limit ROWS ONLY`;
 
-            let request = DB.requestSQL(this.connection)
-            // let request = DB.requestSQL(null)
-            // request.input('offset', sql.Int, offset)
-            // request.input('limit', sql.Int, limit)
+            let request = DB.requestSQL(this.connection);
+
+            request.input('limit', DB.number, limit);
+            request.input('offset', DB.number, offset);
+
             let result = await request.query(queryStatement);
             return result.recordsets[0];
         } catch (err) {
@@ -48,6 +49,42 @@ class BaseService {
             return result;
         } catch (err) {
             throw CustomError.cannotGetEntity(`${this.table} Service`, this.table, err);
+        }
+    }
+
+    queryStatementCreate(item) {
+        try {
+            let buildCommandColumn = [];
+            let buildCommandValues = [];
+
+            for (const [key] of Object.entries(item)) {
+                // Mean: [column]
+                buildCommandColumn.push(`[${key}]`);
+                // Mean: @data
+                buildCommandValues.push(`@${key}`);
+            }
+            return `SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON 
+                        INSERT INTO ${this.table} 
+                        (${buildCommandColumn.join(",")}) 
+                        VALUES (${buildCommandValues.join(",")});
+                        SELECT SCOPE_IDENTITY() AS ${BaseModel.id}`;
+        } catch (err) {
+            throw err
+        }
+    }
+
+    queryStatementUpdate(item, condition) {
+        try {
+            let buildCommand = [];
+            for (const [key] of Object.entries(item)) {
+                buildCommand.push(`[${key}] = @${key}`);
+            }
+            return `SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON 
+                    UPDATE ${this.table} 
+                    SET ${buildCommand.join(",")} 
+                    WHERE ${condition}`;
+        } catch (err) {
+            throw err
         }
     }
 
@@ -76,9 +113,11 @@ class BaseService {
             // QUOTED_IDENTIFIER ON: "column" == [column]
             // QUOTED_IDENTIFIER OFF: "column" == 'column'
             // ANSI_NULLS ON: ColumnValue IS NULL, can not using =, <>, etc.
-            let queryStatement = `SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON INSERT INTO ${this.table} 
-                                    (${buildCommandColumn.join(",")}) 
-                                    VALUES (${buildCommandValues.join(",")}); SELECT SCOPE_IDENTITY() AS ${BaseModel.id}`;
+            let queryStatement = `SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON
+                                    INSERT INTO ${this.table}
+                                    (${buildCommandColumn.join(",")})
+                                    VALUES (${buildCommandValues.join(",")});
+                                    SELECT SCOPE_IDENTITY() AS ${BaseModel.id}`;
             let result = await request.query(queryStatement);
             await transaction.commit();
             // Get ID inserted successfully and return
@@ -98,7 +137,7 @@ class BaseService {
         const transaction = DB.transactionSQL(this.connection)
         try {
             await transaction.begin();
-            const req = DB.requestSQL(transaction);
+            const request = DB.requestSQL(transaction);
             let buildCommand = [];
             for (const [key, value] of Object.entries(item)) {
                 if (value) {
@@ -108,15 +147,16 @@ class BaseService {
                         _value = JSON.stringify(value);
                     }
                     buildCommand.push(`[${key}] = '${_value}'`);
+                } else {
+                    buildCommand.push(`[${key}] = NULL`);
                 }
-                // else {
-                //     buildCommand.push(`[${key}] = NULL`);
-                // }
             }
-            let queryStatement = `SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON UPDATE ${this.table} 
-                                    SET ${buildCommand.join(",")} 
-                                    WHERE ${BaseModel.id} = ${id}`;
-            await req.query(queryStatement);
+            let queryStatement = `SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON
+                                        UPDATE ${this.table}
+                                        SET ${buildCommand.join(",")}
+                                        WHERE ${BaseModel.id} = @id`;
+            request.input('id', DB.number, id);
+            await request.query(queryStatement);
             await transaction.commit();
             // Get ID updated successfully and return
             return {id: id};
@@ -130,32 +170,26 @@ class BaseService {
         }
     }
 
-    // async deleteItem(id) {
-    //     // let pool = await this.connect();
-    //     // const transaction = new sql.Transaction(pool);
-    //     const transaction = await this.transaction();
-    //     try {
-    //         await transaction.begin();
-    //         const req = new sql.Request(transaction);
-    //         req.input('id', sql.Int, id);
-    //         let queryStatement = `DELETE ${this.table} WHERE id = @id`;
-    //         let result = await req.query(queryStatement);
-    //         await transaction.commit();
-    //         return {
-    //             "result": "success",
-    //             "message": "Data is deleted successfully!"
-    //         }
-    //     }
-    //     catch (err) {
-    //         await transaction.rollback();
-    //         console.log(err);
-
-    //         return {
-    //             "result": "fail",
-    //             "message": err.message
-    //         }
-    //     }
-    // }
+    async deleteItem(id) {
+        const transaction = DB.transactionSQL(this.connection)
+        try {
+            await transaction.begin();
+            const request = DB.requestSQL(transaction);
+            request.input('id', DB.number, id);
+            let queryStatement = `DELETE ${this.table} WHERE ${BaseModel.id} = @id`;
+            await request.query(queryStatement);
+            await transaction.commit();
+            return "success";
+        }
+        catch (err) {
+            try {
+                await transaction.rollback();
+                throw CustomError.cannotDeleteEntity(`${this.table} Service`, this.table, err);
+            } catch (errTrans) {
+                throw CustomError.cannotDeleteEntity(`${this.table} Service`, this.table, err);
+            }
+        }
+    }
 }
 
 module.exports = BaseService;

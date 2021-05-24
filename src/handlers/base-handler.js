@@ -1,4 +1,3 @@
-// const BaseService = require('../services/base-service');
 const CustomError = require('../response_error/error');
 const BaseModel = require('../model/base');
 
@@ -53,11 +52,14 @@ class BaseHandler {
 
     async deleteItem(id) {
         try {
-            let user = await this.service.deleteItem(id);
+            let data = {
+                "is_deleted": true
+            };
+            let user = await this.service.updateItem(id, data);
             return user;
         } catch (err) {
             if (err instanceof CustomError) throw err;
-            throw CustomError.deleteItem(`${this.table} Handler`, this.table, err);
+            throw CustomError.cannotDeleteEntity(`${this.table} Handler`, this.table, err);
         }
     }
 }
