@@ -4,12 +4,38 @@ const CustomError = require('../response_error/error');
 const {Time} = require('../common/time');
 const DB = require('../database/db');
 const TABLE_USER = UserModel.tableName
-
-const sql = require('mssql');
+// const sql = require('mssql');
 
 class UserService extends BaseService {
     constructor(connection) {
         super(connection, TABLE_USER);
+    }
+
+    async getByCondition(fields, condition, data) {
+        try {
+            let queryStatement = `SELECT ${fields}
+                                FROM ${this.table}
+                                WHERE ${condition}`;
+            let request = DB.requestSQL(this.connection);
+            request.input('id', DB.number, data.id);
+            request.input('first_name', DB.string, data.first_name);
+            request.input('last_name', DB.string, data.last_name);
+            request.input('email', DB.string, data.email);
+            request.input('address', DB.string, data.address);
+            request.input('username', DB.string, data.username);
+            request.input('password', DB.string, data.password);
+            request.input('is_admin', DB.boolean, data.is_admin);
+            request.input('is_deleted', DB.boolean, data.is_deleted);
+            request.input('created_at', DB.date, data.created_at);
+            request.input('updated_at', DB.date, data.updated_at);
+            request.input('last_login_date', DB.date, data.last_login_date);
+            let result = await request.query(queryStatement);
+            result = result.recordsets[0];
+            if (result && result.length > 0) return result[0];
+            return result;
+        } catch (err) {
+            throw CustomError.cannotGetEntity(`${this.table} Service`, this.table, err);
+        }
     }
 
     async addItem(item) {

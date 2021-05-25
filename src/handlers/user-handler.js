@@ -36,8 +36,8 @@ class UserHandler extends BaseHandler {
                             ${UserModel.address},
                             ${UserModel.username},
                             ${UserModel.is_admin}`;
-            let condition = `${UserModel.id} = ${data} AND ${UserModel.is_deleted} = 0`;
-            let user = await this.service.getByCondition(fields, condition);
+            let condition = `${UserModel.id} = @id AND ${UserModel.is_deleted} = 0`;
+            let user = await this.service.getByCondition(fields, condition, {id: data});
             return user;
         } catch (err) {
             if (err instanceof CustomError) throw err;
@@ -48,9 +48,9 @@ class UserHandler extends BaseHandler {
     async addItem(data, hash) {
         try {
             let fields = `${UserModel.id}`;
-            let condition = `${UserModel.email} = '${data.email}' AND ${UserModel.is_deleted} = 0`;
+            let condition = `${UserModel.email} = @email AND ${UserModel.is_deleted} = 0`;
 
-            let userExist = await this.service.getByCondition(fields, condition);
+            let userExist = await this.service.getByCondition(fields, condition, data);
 
             if (!Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "Email already exist!");
 
@@ -70,8 +70,8 @@ class UserHandler extends BaseHandler {
             let fields = `${UserModel.id},
                             ${UserModel.password}, 
                             ${UserModel.salt}`;
-            let condition = `${UserModel.id} = ${id} AND ${UserModel.is_deleted} = 0`;
-            let userExist = await this.service.getByCondition(fields, condition);
+            let condition = `${UserModel.id} = @id AND ${UserModel.is_deleted} = 0`;
+            let userExist = await this.service.getByCondition(fields, condition, {id: id});
 
             if (Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "User not exist!");
 
@@ -97,8 +97,8 @@ class UserHandler extends BaseHandler {
     async deleteItem(id) {
         try {
             let fields = `${UserModel.id}`;
-            let condition = `${UserModel.id} = ${id} AND ${UserModel.is_deleted} = 0`;
-            let userExist = await this.service.getByCondition(fields, condition);
+            let condition = `${UserModel.id} = @id AND ${UserModel.is_deleted} = 0`;
+            let userExist = await this.service.getByCondition(fields, condition, {id: id});
 
             if (Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "User not exist!");
             let data = {

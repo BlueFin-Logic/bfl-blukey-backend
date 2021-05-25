@@ -42,7 +42,7 @@ class BaseService {
             let queryStatement = `SELECT ${fields}
                                 FROM ${this.table}
                                 WHERE ${condition}`;
-            let request = DB.requestSQL(this.connection)
+            let request = DB.requestSQL(this.connection);
             let result = await request.query(queryStatement);
             result = result.recordsets[0];
             if (result && result.length > 0) return result[0];
