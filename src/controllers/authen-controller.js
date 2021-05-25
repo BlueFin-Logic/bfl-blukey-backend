@@ -2,7 +2,6 @@ const AuthenHandler = require('../handlers/authen-handler')
 const {HashService} = require('../common/hash')
 const CustomResponse = require('../response_error/response')
 const CustomError = require('../response_error/error')
-const UserModel = require('../model/user')
 const UserService = require('../services/user-service')
 
 module.exports.login = function login(appContext) {
@@ -19,7 +18,7 @@ module.exports.login = function login(appContext) {
             next(CustomResponse.newSimpleResponse(`Authentication Controller`, `Login successful!`, data));
         } catch (err) {
             if (err instanceof CustomError) next(err);
-            else next(CustomError.cannotGetEntity(`Authentication Controller`, `${UserModel.tableName}`, err));
+            else next(CustomError.unauthorized(`Authentication Controller`, `Unauthorized.`, err));
         }
     }
 }

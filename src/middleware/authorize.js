@@ -1,41 +1,41 @@
-const { Utilities } = require('../common/utilities')
-const { TokenService } = require('../common/token');
-const STATUS_UNAUTHORIZED = 401;
-const STATUS_FORBIDDEN = 403;
+const CustomError = require('../response_error/error');
 
-// const { STATUS_UNAUTHORIZED, STATUS_FORBIDDEN } = require('../common/statusResponse')
-
-// // Login user
-// module.exports.authorizeController = async (req, res, next) => {
-//     try {
-//         const authHeader = req.headers['authorization']
-//         const token = authHeader && authHeader.split(' ')[1]
-//         if (token === null) return res.status(STATUS_UNAUTHORIZED).json(Utilities.responseSimple("Unauthorized."))
-//         let decoded = TokenService.verify(token);
-//         req.currentUserId = decoded.id;
-//         req.currentUserRole = decoded.is_admin;
-//         next();
-//     } catch (err) {
-//         console.log(err);
-//         return res.status(STATUS_FORBIDDEN).json(err)
-//     }
-// }
-
-class MiddlewareController {
-    // authorize token
-    async authorize(req, res, next) {
+// Authorize user
+module.exports.authorizedController = function authorizedController(appContext) {
+    return async (req, res, next) => {
         try {
             const authHeader = req.headers['authorization']
             const token = authHeader && authHeader.split(' ')[1]
-            if (token === null) return res.status(STATUS_UNAUTHORIZED).json(Utilities.responseSimple("Unauthorized."))
-            let decoded = TokenService.verify(token);
+            if (!token) throw CustomError.unauthorized(`Authentication Controller`, "Token is not found!" )
+
+            const tokenService = appContext.getTokenJWT;
+            let decoded = tokenService.verify(token);
+
             req.currentUserId = decoded.id;
             req.currentUserRole = decoded.is_admin;
             next();
         } catch (err) {
-            console.log(err);
-            return res.status(STATUS_FORBIDDEN).json(err)
+            if (err instanceof CustomError) next(err);
+            else next(CustomError.unauthorized(`Authorized Controller`, `Unauthorized.`, err));
         }
     }
 }
-module.exports = new MiddlewareController();
+
+// class MiddlewareController {
+//     // authorize token
+//     async authorize(req, res, next) {
+//         try {
+//             const authHeader = req.headers['authorization']
+//             const token = authHeader && authHeader.split(' ')[1]
+//             if (token === null) throw CustomError.unauthorized(`Authentication Controller`, `Unauthorized.`, "Token is not found!")
+//             let decoded = TokenService.verify(token);
+//             req.currentUserId = decoded.id;
+//             req.currentUserRole = decoded.is_admin;
+//             next();
+//         } catch (err) {
+//             if (err instanceof CustomError) throw err;
+//             throw CustomError.forbidden(`Authen Handler`, `Forbidden.`, err);
+//         }
+//     }
+// }
+// module.exports = new MiddlewareController();

@@ -160,3 +160,11 @@ SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON
                     UPDATE [Users] 
                     SET [username] = @username,[password] = @password,[salt] = @salt 
                     WHERE [id] = @[id]
+
+SELECT [id]
+FROM [Users]
+WHERE [email] = 'lam6@gmail.com' selct by lam haha' AND [is_deleted] = 0
+
+SELECT [id]
+                                FROM [Users]
+                                WHERE [email] = @email AND [is_deleted] = 0

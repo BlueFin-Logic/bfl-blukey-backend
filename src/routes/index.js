@@ -11,8 +11,8 @@ module.exports = function setupRouter(appContext) {
     // login
     router.post("/api/v1/login", authenController.login(appContext))
     // user
-    // router.use("/api/v1/users", middlewareController.authorize, users(appContext))
-    router.use("/api/v1/users", users(appContext))
+    router.use("/api/v1/users", middlewareController.authorizedController(appContext), users(appContext))
+    // router.use("/api/v1/users", users(appContext))
     // register
     // router.get("/api/v1/ping", userController.pingUser(appContext))
     return router;

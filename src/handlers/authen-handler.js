@@ -38,7 +38,7 @@ class AuthenHandler extends BaseHandler {
             }
         } catch (err) {
             if (err instanceof CustomError) throw err;
-            throw CustomError.unauthorized(`Authen Handler`, `Unauthorized`, err);
+            throw CustomError.unauthorized(`Authentication Handler`, `Unauthorized.`, err);
         }
     }
 }

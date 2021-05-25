@@ -1,7 +1,6 @@
 const BaseHandler = require('./base-handler');
 const CustomError = require('../response_error/error');
 const {Utilities} = require('../common/utilities');
-const {HashService} = require('../common/hash');
 const UserModel = require('../model/user');
 const TABLE_USER = UserModel.tableName;
 
@@ -76,7 +75,7 @@ class UserHandler extends BaseHandler {
             if (Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "User not exist!");
 
             if (data.oldPassword) {
-                if (userExist.password === hash.hashMD5(data.oldPassword + userExist.salt)) {
+                if (data.password && userExist.password === hash.hashMD5(data.oldPassword + userExist.salt)) {
                     data.salt = hash.genSalt(15);
                     data.password = hash.hashMD5(data.password + data.salt);
                 } else {
