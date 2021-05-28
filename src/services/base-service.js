@@ -9,6 +9,19 @@ class BaseService {
         this.table = table;
     }
 
+    async countTotalRecord() {
+        try {
+            let queryStatement = `SELECT COUNT(1) as total FROM ${this.table}`;
+            let request = DB.requestSQL(this.connection);
+            let result = await request.query(queryStatement);
+            result = result.recordsets[0];
+            if (result && result.length > 0) return result[0];
+            return result;
+        } catch (err) {
+            throw CustomError.cannotGetEntity(`${this.table} Service`, this.table, err);
+        }
+    }
+
     async getAll(page, limit, fields, conditions = null) {
         try {
             if (page < 1) page = 1;

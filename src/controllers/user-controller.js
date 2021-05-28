@@ -25,7 +25,7 @@ module.exports.listUser = function listUser(appContext) {
 
             let paging = {
                 page: page,
-                total: data.length
+                total: data.total
             }
 
             next(CustomResponse.newSuccessResponse(`${UserModel.tableName} Controller`, `Get list users successful.`, data, paging))
@@ -42,8 +42,6 @@ module.exports.getUserInfo = function getUserInfo(appContext) {
         try {
             // Only user can get data yourseft or admin
             const currentUserId = req.currentUserId;
-            // const is_admin = req.currentUserRole;
-            // if (currentUserId !== id && !is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
             let db = appContext.getPoolMSSQL;
             let service = new UserService(db);

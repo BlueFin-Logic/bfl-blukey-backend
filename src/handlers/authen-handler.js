@@ -24,9 +24,9 @@ class AuthenHandler extends BaseHandler {
             let userExist = await this.service.getByCondition(fields, condition, {username: username});
             
             // Check user is exist.
-            if (Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "User is not found!");
+            if (Utilities.isEmpty(userExist)) throw CustomError.badRequest(`Authentication Handler`, "User is not found!");
 
-            if (userExist.password !== hash.hashMD5(password + userExist.salt)) throw CustomError.badRequest(`${this.table} Handler`, "Invalid password!");
+            if (userExist.password !== hash.hashMD5(password + userExist.salt)) throw CustomError.badRequest(`Authentication Handler`, "Invalid password!");
 
             let data = {
                 id: userExist.id,
@@ -40,6 +40,20 @@ class AuthenHandler extends BaseHandler {
         } catch (err) {
             if (err instanceof CustomError) throw err;
             throw CustomError.unauthorized(`Authentication Handler`, `Unauthorized.`, err);
+        }
+    }
+
+    async authorized(data) {
+        try {
+            let fields = `${UserModel.id}`;
+            let condition = `${UserModel.id} = @id AND ${UserModel.is_deleted} = 0`;
+            let user = await this.service.getByCondition(fields, condition, {id: data});
+            // Check user is exist.
+            if (Utilities.isEmpty(user)) throw CustomError.badRequest(`Authentication Handler`, "User is not found!");
+            return user;
+        } catch (err) {
+            if (err instanceof CustomError) throw err;
+            throw CustomError.cannotGetEntity(`Authentication Handler`, this.table, err);
         }
     }
 }

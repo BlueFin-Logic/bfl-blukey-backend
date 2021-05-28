@@ -18,7 +18,12 @@ class UserHandler extends BaseHandler {
                             ${UserModel.address},
                             ${UserModel.username}`;
             let conditions = `${UserModel.is_deleted} = '0'`;
-            let users = await this.service.getAll(page, limit, fields, conditions);
+            // let users = await this.service.getAll(page, limit, fields, conditions);
+            let [users, countRecord] = await Promise.all([
+                                                this.service.getAll(page, limit, fields, conditions),
+                                                this.service.countTotalRecord()
+                                            ]);
+            users.total = countRecord.total;
             return users;
         } catch (err) {
             if (err instanceof CustomError) throw err;

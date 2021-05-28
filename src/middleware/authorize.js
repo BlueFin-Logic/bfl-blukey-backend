@@ -1,5 +1,5 @@
 const CustomError = require('../response_error/error')
-const UserHandler = require('../handlers/user-handler')
+const AuthenHandler = require('../handlers/authen-handler')
 const UserService = require('../services/user-service')
 
 // Authorize user
@@ -8,23 +8,23 @@ module.exports.authorizedController = function authorizedController(appContext) 
         try {
             const authHeader = req.headers['authorization']
             const token = authHeader && authHeader.split(' ')[1]
-            if (!token) throw CustomError.unauthorized(`Authentication Controller`, "Token is not found!" )
+            if (!token) throw CustomError.unauthorized(`Authorized Middleware Controller`, "Token is not found!" )
 
             const tokenService = appContext.getTokenJWT;
             let decoded = tokenService.verify(token);
 
             let db = appContext.getPoolMSSQL;
             let service = new UserService(db);
-            let handler = new UserHandler(service);
+            let handler = new AuthenHandler(service);
 
-            await handler.getById(decoded.id);
+            await handler.authorized(decoded.id);
 
             req.currentUserId = decoded.id;
             req.currentUserRole = decoded.is_admin;
             next();
         } catch (err) {
             if (err instanceof CustomError) next(err);
-            else next(CustomError.unauthorized(`Authorized Controller`, `Unauthorized.`, err));
+            else next(CustomError.unauthorized(`Authorized Middleware Controller`, `Unauthorized.`, err));
         }
     }
 }

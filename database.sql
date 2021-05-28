@@ -82,9 +82,14 @@ INSERT INTO [Documents] ([link],[user_id]) VALUES ('a.com','1')
 INSERT INTO [Documents] ([link],[user_id]) VALUES ('b.com','1')
 INSERT INTO [Documents] ([link],[user_id]) VALUES ('c.com','2')
 
+SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON 
+UPDATE [Users] 
+SET [is_deleted] = 1
+WHERE [id] = 1
 
-
-SELECT *
+SELECT COUNT(*)
+ 
+SELECT COUNT(1) as total FROM [Users]
 FROM [Users]
 left outer JOIN [Documents] ON [Users].[id] = [Documents].[user_id]
 FOR JSON AUTO, INCLUDE_NULL_VALUES
