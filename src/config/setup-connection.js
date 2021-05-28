@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express();
+const cors = require('cors');
+const helmet = require("helmet");
 const config = require('./config');
 const DB = require('../database/db')
 const routes = require("../routes");
@@ -24,13 +26,17 @@ module.exports = async function setupConnection(appContext) {
         };
         appContext.setTokenJWT = new TokenService(token, options);
 
+        // CORS
+        app.use(cors());
+        app.use(helmet());
+
         // check connection
         app.get("/test", (req, res) => {
             res.send("pong");
         });
 
         // body parse
-        app.use(express.urlencoded({extended: true}));
+        app.use(express.urlencoded({ extended: true }));
         app.use(express.json());
 
         // setup routes index

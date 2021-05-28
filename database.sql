@@ -76,7 +76,7 @@ INSERT INTO [Users] ([first_name],[last_name],[email],[address],[username],[pass
 VALUES ('Nathan','Nguyen','nathan@gmail.com','Us','nathan','QQV9maR9RLIh2CfSpTnUGw==','$2b$15$55yyKez0y1tqEe.pOIOIbO',1, '2021-05-03 12:37:34.373','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
 go
 INSERT INTO [Users] ([first_name],[last_name],[email],[address],[username],[password],[salt],[is_admin],[created_at],[updated_at],[last_login_date]) 
-VALUES ('Nhan','Nguyen','nhan@gmail.com','nhan','lam','D5SsAvX8FIkqCwQp+tdqxA==','$2b$15$BkH9RVfydKHI3pLl0BCg/e',+1, '2021-05-03 12:37:34.373','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
+VALUES ('Nhan','Nguyen','nhan@gmail.com','Us','nhan','D5SsAvX8FIkqCwQp+tdqxA==','$2b$15$BkH9RVfydKHI3pLl0BCg/e',+1, '2021-05-03 12:37:34.373','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
 
 INSERT INTO [Documents] ([link],[user_id]) VALUES ('a.com','1')
 INSERT INTO [Documents] ([link],[user_id]) VALUES ('b.com','1')

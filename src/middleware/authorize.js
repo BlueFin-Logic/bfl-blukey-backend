@@ -1,4 +1,6 @@
-const CustomError = require('../response_error/error');
+const CustomError = require('../response_error/error')
+const UserHandler = require('../handlers/user-handler')
+const UserService = require('../services/user-service')
 
 // Authorize user
 module.exports.authorizedController = function authorizedController(appContext) {
@@ -10,6 +12,12 @@ module.exports.authorizedController = function authorizedController(appContext) 
 
             const tokenService = appContext.getTokenJWT;
             let decoded = tokenService.verify(token);
+
+            let db = appContext.getPoolMSSQL;
+            let service = new UserService(db);
+            let handler = new UserHandler(service);
+
+            await handler.getById(decoded.id);
 
             req.currentUserId = decoded.id;
             req.currentUserRole = decoded.is_admin;

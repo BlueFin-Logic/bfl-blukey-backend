@@ -10,6 +10,8 @@ module.exports = function setupRouter(appContext) {
     router.post("/api/v1/register", userController.registerUser(appContext))
     // login
     router.post("/api/v1/login", authenController.login(appContext))
+    // info
+    router.get("/api/v1/info", middlewareController.authorizedController(appContext), userController.getUserInfo(appContext))
     // user
     router.use("/api/v1/users", middlewareController.authorizedController(appContext), users(appContext))
     // router.use("/api/v1/users", users(appContext))
@@ -17,6 +19,5 @@ module.exports = function setupRouter(appContext) {
     // router.get("/api/v1/ping", userController.pingUser(appContext))
     return router;
 }
-
 
 // module.exports = router.get("/api/v1/ping", userController.pingUser)

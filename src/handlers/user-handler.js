@@ -37,10 +37,12 @@ class UserHandler extends BaseHandler {
                             ${UserModel.is_admin}`;
             let condition = `${UserModel.id} = @id AND ${UserModel.is_deleted} = 0`;
             let user = await this.service.getByCondition(fields, condition, {id: data});
+            // Check user is exist.
+            if (Utilities.isEmpty(user)) throw CustomError.badRequest(`${this.table} Handler`, "User is not found!");
             return user;
         } catch (err) {
             if (err instanceof CustomError) throw err;
-            throw CustomError.cannotListEntity(`${this.table} Handler`, this.table, err);
+            throw CustomError.cannotGetEntity(`${this.table} Handler`, this.table, err);
         }
     }
 

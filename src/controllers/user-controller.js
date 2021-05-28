@@ -36,6 +36,29 @@ module.exports.listUser = function listUser(appContext) {
     }
 }
 
+// Get User Info
+module.exports.getUserInfo = function getUserInfo(appContext) {
+    return async (req, res, next) => {
+        try {
+            // Only user can get data yourseft or admin
+            const currentUserId = req.currentUserId;
+            // const is_admin = req.currentUserRole;
+            // if (currentUserId !== id && !is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
+
+            let db = appContext.getPoolMSSQL;
+            let service = new UserService(db);
+            let handler = new UserHandler(service);
+
+            let data = await handler.getById(currentUserId);
+
+            next(CustomResponse.newSimpleResponse(`${UserModel.tableName} Controller`, `Get users by id successful.`, data))
+        } catch (err) {
+            if (err instanceof CustomError) next(err);
+            else next(CustomError.cannotGetEntity(`${UserModel.tableName} Controller`, `${UserModel.tableName}`, err));
+        }
+    }
+}
+
 // Get User By ID
 module.exports.getByIdUser = function getByIdUser(appContext) {
     return async (req, res, next) => {
