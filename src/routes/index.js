@@ -3,7 +3,9 @@ const router = express.Router();
 const users = require("./users");
 const userController = require("../controllers/user-controller");
 const authenController = require("../controllers/authen-controller");
-const middlewareController = require("../middleware/authorize");
+const uploadController = require("../controllers/upload-controller");
+const middlewareAuthorize = require("../middleware/authorize");
+const middlewareupload = require("../middleware/upload");
 
 module.exports = function setupRouter(appContext) {
     // register
@@ -11,9 +13,11 @@ module.exports = function setupRouter(appContext) {
     // login
     router.post("/api/v1/login", authenController.login(appContext))
     // info
-    router.get("/api/v1/info", middlewareController.authorizedController(appContext), userController.getUserInfo(appContext))
+    router.get("/api/v1/info", middlewareAuthorize.authorizedMiddleware(appContext), userController.getUserInfo(appContext))
+    // upload
+    router.post("/api/v1/upload", middlewareAuthorize.authorizedMiddleware(appContext), middlewareupload.validateUploadMiddleware(appContext), uploadController.upload(appContext))
     // user
-    router.use("/api/v1/users", middlewareController.authorizedController(appContext), users(appContext))
+    router.use("/api/v1/users", middlewareAuthorize.authorizedMiddleware(appContext), users(appContext))
     // router.use("/api/v1/users", users(appContext))
     // register
     // router.get("/api/v1/ping", userController.pingUser(appContext))

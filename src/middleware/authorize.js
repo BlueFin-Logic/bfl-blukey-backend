@@ -3,12 +3,12 @@ const AuthenHandler = require('../handlers/authen-handler')
 const UserService = require('../services/user-service')
 
 // Authorize user
-module.exports.authorizedController = function authorizedController(appContext) {
+module.exports.authorizedMiddleware = function authorizedMiddleware(appContext) {
     return async (req, res, next) => {
         try {
             const authHeader = req.headers['authorization']
             const token = authHeader && authHeader.split(' ')[1]
-            if (!token) throw CustomError.unauthorized(`Authorized Middleware Controller`, "Token is not found!" )
+            if (!token) throw CustomError.unauthorized(`Authorized Middleware`, "Token is not found!" )
 
             const tokenService = appContext.getTokenJWT;
             let decoded = tokenService.verify(token);
@@ -24,7 +24,7 @@ module.exports.authorizedController = function authorizedController(appContext) 
             next();
         } catch (err) {
             if (err instanceof CustomError) next(err);
-            else next(CustomError.unauthorized(`Authorized Middleware Controller`, `Unauthorized.`, err));
+            else next(CustomError.unauthorized(`Authorized Middleware`, `Unauthorized.`, err));
         }
     }
 }

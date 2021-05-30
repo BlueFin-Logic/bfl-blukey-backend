@@ -33,12 +33,6 @@ class Utilities {
     isObject(p) {
         return (p != null && typeof p === 'object');
     }
-
-    responseSimple(message) {
-        return {
-            message: message
-        };
-    }
 }
 
 module.exports.Utilities = new Utilities();
