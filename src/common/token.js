@@ -9,8 +9,9 @@ class TokenService {
     sign(data, userEmail, expiresIn) {
         try {
             this.options.subject = userEmail;
-            if (expiresIn) this.options.expiresIn = expiresIn;
-            let token = jwt.sign(data, this.token_secret, this.options);
+            let options = JSON.parse(JSON.stringify(this.options));
+            if (expiresIn) options.expiresIn = expiresIn;
+            let token = jwt.sign(data, this.token_secret, options);
             return token;
         } catch (err) {
             throw err

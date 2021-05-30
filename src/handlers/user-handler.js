@@ -16,7 +16,8 @@ class UserHandler extends BaseHandler {
                             ${UserModel.last_name},
                             ${UserModel.email},
                             ${UserModel.address},
-                            ${UserModel.username}`;
+                            ${UserModel.username},
+                            ${UserModel.is_admin}`;
             let conditions = `${UserModel.is_deleted} = '0'`;
             // let users = await this.service.getAll(page, limit, fields, conditions);
             let [users, countRecord] = await Promise.all([
@@ -81,8 +82,8 @@ class UserHandler extends BaseHandler {
 
             if (Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "User not exist!");
 
-            if (data.oldPassword) {
-                if (data.password && userExist.password === hash.hashMD5(data.oldPassword + userExist.salt)) {
+            if (data.old_password) {
+                if (data.password && userExist.password === hash.hashMD5(data.old_password + userExist.salt)) {
                     data.salt = hash.genSalt(15);
                     data.password = hash.hashMD5(data.password + data.salt);
                 } else {
