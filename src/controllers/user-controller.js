@@ -134,7 +134,7 @@ module.exports.updateUser = function updateUser(appContext) {
 module.exports.deleteUser = function deleteUser(appContext) {
     return async (req, res, next) => {
         try {
-            const id = req.params.id;
+            const id = Utilities.parseInt(req.params.id, 1);;
 
             // Only admin can delete
             // const is_admin = req.currentUserRole;

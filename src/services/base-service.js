@@ -57,7 +57,7 @@ class BaseService {
             let request = this.db.requestSQL(this.db.pool);
             let result = await request.query(queryStatement);
             result = result.recordsets[0];
-            if (result && result.length > 0) return result[0];
+            // if (result && result.length > 0) return result[0];
             return result;
         } catch (err) {
             throw CustomError.cannotGetEntity(`${this.table} Service`, this.table, err);

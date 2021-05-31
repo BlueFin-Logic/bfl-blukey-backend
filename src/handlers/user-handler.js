@@ -44,8 +44,8 @@ class UserHandler extends BaseHandler {
             let condition = `${UserModel.id} = @id AND ${UserModel.is_deleted} = 0`;
             let user = await this.service.getByCondition(fields, condition, {id: data});
             // Check user is exist.
-            if (Utilities.isEmpty(user)) throw CustomError.badRequest(`${this.table} Handler`, "User is not found!");
-            return user;
+            if (user.length === 0) throw CustomError.badRequest(`${this.table} Handler`, "User is not found!");
+            return user[0];
         } catch (err) {
             if (err instanceof CustomError) throw err;
             throw CustomError.cannotGetEntity(`${this.table} Handler`, this.table, err);
@@ -59,7 +59,7 @@ class UserHandler extends BaseHandler {
 
             let userExist = await this.service.getByCondition(fields, condition, data);
 
-            if (!Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "Email already exist!");
+            if (userExist.length > 0) throw CustomError.badRequest(`${this.table} Handler`, "Email already exist!");
 
             data.salt = hash.genSalt(15);
             data.password = hash.hashMD5(data.password + data.salt);
@@ -80,7 +80,9 @@ class UserHandler extends BaseHandler {
             let condition = `${UserModel.id} = @id AND ${UserModel.is_deleted} = 0`;
             let userExist = await this.service.getByCondition(fields, condition, {id: id});
 
-            if (Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "User not exist!");
+            if (userExist.length === 0) throw CustomError.badRequest(`${this.table} Handler`, "User not exist!");
+
+            userExist = userExist[0]
 
             if (data.old_password) {
                 if (data.password && userExist.password === hash.hashMD5(data.old_password + userExist.salt)) {
@@ -107,7 +109,7 @@ class UserHandler extends BaseHandler {
             let condition = `${UserModel.id} = @id AND ${UserModel.is_deleted} = 0`;
             let userExist = await this.service.getByCondition(fields, condition, {id: id});
 
-            if (Utilities.isEmpty(userExist)) throw CustomError.badRequest(`${this.table} Handler`, "User not exist!");
+            if (userExist.length === 0) throw CustomError.badRequest(`${this.table} Handler`, "User not exist!");
             let data = {
                 "is_deleted": true
             };

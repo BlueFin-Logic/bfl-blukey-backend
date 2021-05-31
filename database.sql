@@ -59,11 +59,12 @@ CREATE TABLE [Users] (
 
 CREATE TABLE [Documents] (
     [id] INT PRIMARY KEY IDENTITY (1, 1),
-    [link] VARCHAR(max) NOT NULL,
+    [container] VARCHAR(30) NOT NULL,
+	[file_name] VARCHAR(50) NOT NULL,
     [user_id] INT NOT NULL,
 	[is_deleted] BIT DEFAULT 0, 
-	[created_at] DATETIME NOT NULL DEFAULT GETDATE(),
-	[updated_at] DATETIME NOT NULL DEFAULT GETDATE(),
+	[created_at] DATETIME NOT NULL,
+	[updated_at] DATETIME NOT NULL,
 );
 
 Monday May 3rd 2021, 12:27:14 pm
@@ -78,9 +79,12 @@ go
 INSERT INTO [Users] ([first_name],[last_name],[email],[address],[username],[password],[salt],[is_admin],[created_at],[updated_at],[last_login_date]) 
 VALUES ('Nhan','Nguyen','nhan@gmail.com','Us','nhan','D5SsAvX8FIkqCwQp+tdqxA==','$2b$15$BkH9RVfydKHI3pLl0BCg/e',+1, '2021-05-03 12:37:34.373','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
 
-INSERT INTO [Documents] ([link],[user_id]) VALUES ('a.com','1')
-INSERT INTO [Documents] ([link],[user_id]) VALUES ('b.com','1')
-INSERT INTO [Documents] ([link],[user_id]) VALUES ('c.com','2')
+INSERT INTO [Documents] ([container], [file_name], [user_id], [created_at], [updated_at]) VALUES ('pdf','a.pdf','1','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
+INSERT INTO [Documents] ([container], [file_name], [user_id], [created_at], [updated_at]) VALUES ('pdf','b.pdf','1','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
+INSERT INTO [Documents] ([container], [file_name], [user_id], [created_at], [updated_at]) VALUES ('pdf','c.pdf','1','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
+
+SELECT * 
+FROM [Documents]
 
 SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON 
 UPDATE [Users] 
@@ -168,8 +172,13 @@ SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON
 
 SELECT [id]
 FROM [Users]
-WHERE [email] = 'lam6@gmail.com' selct by lam haha' AND [is_deleted] = 0
+--WHERE [email] = 'lam6@gmail.com' selct by lam haha' AND [is_deleted] = 0
 
 SELECT [id]
-                                FROM [Users]
-                                WHERE [email] = @email AND [is_deleted] = 0
+FROM [Users]
+WHERE [email] = @email AND [is_deleted] = 0
+
+
+SELECT [id],[container],[file_name]
+FROM [Documents]
+WHERE [user_id] = 1 AND [is_deleted] = 0

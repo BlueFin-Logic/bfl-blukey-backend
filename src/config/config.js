@@ -18,6 +18,8 @@ const TOKEN_SECRET = process.env.TOKEN_SECRET;
 const EXPIRES_IN = process.env.EXPIRES_IN;
 const SQL_ENCRYPT = process.env.SQL_ENCRYPT === "true";
 const SQL_TRUST_SERVER_CERTIFICATE = process.env.SQL_TRUST_SERVER_CERTIFICATE === "true";
+const STORAGE_NAME = process.env.STORAGE_NAME;
+const STORAGE_KEY = process.env.STORAGE_KEY;
 
 
 module.exports = {
@@ -44,6 +46,10 @@ module.exports = {
         algorithm: ALGORITHM,
         token_secret: TOKEN_SECRET,
         expiresIn: EXPIRES_IN,
+    },
+    azureStorage: {
+        storageName: STORAGE_NAME,
+        storageKey: STORAGE_KEY
     },
 };
 

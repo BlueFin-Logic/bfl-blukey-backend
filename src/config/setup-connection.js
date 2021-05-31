@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require("helmet");
 const config = require('./config');
 const DB = require('../database/db')
+const AzureStorageService = require('../common/azure-storage')
 const routes = require("../routes");
 const responseErrorHandler = require("../response_error/response-error-handler.js");
 const CustomError = require('../response_error/error');
@@ -11,11 +12,31 @@ const TokenService = require('../common/token');
 
 module.exports = async function setupConnection(appContext) {
     try {
-        // Connect DB
+        // Create DB
         const db = new DB(config.configMSSQL);
-        let [pool] = await Promise.all([db.connectDB(db.config)]);
+
+        // Create azure storage
+        const storage = new AzureStorageService(config.azureStorage.storageName, config.azureStorage.storageKey);
+        storage.setSharedKeyCredential = storage.createSharedKeyCredential();
+        storage.setBlobServiceClient = storage.createBlobServiceClient();
+
+        // Check connect to DB, Azure Storage
+        let [pool, checkStorage] = await Promise.all([
+            db.connectDB(db.config),
+            storage.listFirstContainers()
+        ]);
+
+        // Success connect DB and set pool
         db.pool = pool;
+
+        // Success connect storage: Already add above
+        checkStorage
+        
+        // Set DB to App Context
         appContext.setDB = db;
+
+        // Set storage to App Context
+        appContext.setStorage = storage;
 
         // Get setting token config
         const token = config.tokenJWT.token_secret;

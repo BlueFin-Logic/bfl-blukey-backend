@@ -1,25 +1,22 @@
-const UploadHandler = require('../handlers/upload-handler')
-const { HashService } = require('../common/hash')
+const DocumentHandler = require('../handlers/document-handler')
+const { Utilities } = require('../common/utilities')
 const CustomResponse = require('../response_error/response')
 const CustomError = require('../response_error/error')
 const DocumentService = require('../services/document-service')
 
-module.exports.upload = function upload(appContext) {
+module.exports.getByUserID = function getByUserID(appContext) {
     return async (req, res, next) => {
         try {
-            const currentUserId = req.currentUserId;
-
-            let dataFile = Buffer.from(req.file.buffer);
-            let originalNameFile = req.file.originalname;
-            let mimeTypeFile = req.file.mimetype;
+            let userID = Utilities.parseInt(req.query.userID, 1);
 
             let db = appContext.getDB;
             let service = new DocumentService(db);
-            let handler = new UploadHandler(service);
-
+            let handler = new DocumentHandler(service);
+            
             let storage = appContext.getStorage;
-            let data = await handler.upload(storage, currentUserId, dataFile, originalNameFile, mimeTypeFile);
+            let data = await handler.getByUserId(storage, userID);
             next(CustomResponse.newSimpleResponse(`Upload Controller`, `Upload successful!`, data));
+            // next(CustomResponse.newSimpleResponse(`Upload Controller`, `Upload successful!`, ""));
         } catch (err) {
             if (err instanceof CustomError) next(err);
             else next(CustomError.unauthorized(`Upload Controller`, `Upload had problems!.`, err));

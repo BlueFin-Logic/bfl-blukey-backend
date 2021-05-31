@@ -1,9 +1,9 @@
 const FileType = require('file-type');
 
 class FileTypeService {
-    fromBuffer(data) {
+    fromBuffer(buffer) {
         try {
-            return FileType.fromBuffer(data);
+            return FileType.fromBuffer(buffer);
         } catch (err) {
             throw err
         }
