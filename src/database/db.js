@@ -1,15 +1,20 @@
 const sql = require('mssql');
 
 class DB {
-    static connectDB(configMSSQL) {
+    constructor(config) {
+        this.config = config;
+        this.pool = null;
+    }
+
+    connectDB(config) {
         try {
-            return sql.connect(configMSSQL);
+            return sql.connect(config);
         } catch (err) {
             throw err;
         }
     }
 
-    static requestSQL(pool) {
+    requestSQL(pool) {
         try {
             return new sql.Request(pool);
         } catch (err) {
@@ -17,7 +22,7 @@ class DB {
         }
     }
 
-    static transactionSQL(pool) {
+    transactionSQL(pool) {
         try {
             return new sql.Transaction(pool);
         } catch (err) {
@@ -25,7 +30,7 @@ class DB {
         }
     }
 
-    static get number() {
+    get number() {
         try {
             return sql.Int;
         } catch (err) {
@@ -33,7 +38,7 @@ class DB {
         }
     }
 
-    static get string() {
+    get string() {
         try {
             return sql.NVarChar;
         } catch (err) {
@@ -41,7 +46,7 @@ class DB {
         }
     }
 
-    static get boolean() {
+    get boolean() {
         try {
             return sql.Bit;
         } catch (err) {
@@ -49,7 +54,7 @@ class DB {
         }
     }
 
-    static get date() {
+    get date() {
         try {
             return sql.DateTime;
         } catch (err) {

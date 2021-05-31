@@ -2,13 +2,11 @@ const BaseService = require('./base-service');
 const UserModel = require('../model/user');
 const CustomError = require('../response_error/error');
 const {Time} = require('../common/time');
-const DB = require('../database/db');
-const TABLE_USER = UserModel.tableName
-// const sql = require('mssql');
+const TABLE_USER = UserModel.tableName;
 
 class UserService extends BaseService {
-    constructor(connection) {
-        super(connection, TABLE_USER);
+    constructor(db) {
+        super(db, TABLE_USER);
     }
 
     async getByCondition(fields, condition, data) {
@@ -16,19 +14,19 @@ class UserService extends BaseService {
             let queryStatement = `SELECT ${fields}
                                 FROM ${this.table}
                                 WHERE ${condition}`;
-            let request = DB.requestSQL(this.connection);
-            request.input('id', DB.number, data.id);
-            request.input('first_name', DB.string, data.first_name);
-            request.input('last_name', DB.string, data.last_name);
-            request.input('email', DB.string, data.email);
-            request.input('address', DB.string, data.address);
-            request.input('username', DB.string, data.username);
-            request.input('password', DB.string, data.password);
-            request.input('is_admin', DB.boolean, data.is_admin);
-            request.input('is_deleted', DB.boolean, data.is_deleted);
-            request.input('created_at', DB.date, data.created_at);
-            request.input('updated_at', DB.date, data.updated_at);
-            request.input('last_login_date', DB.date, data.last_login_date);
+            let request = this.db.requestSQL(this.db.pool);
+            request.input('id', this.db.number, data.id);
+            request.input('first_name', this.db.string, data.first_name);
+            request.input('last_name', this.db.string, data.last_name);
+            request.input('email', this.db.string, data.email);
+            request.input('address', this.db.string, data.address);
+            request.input('username', this.db.string, data.username);
+            request.input('password', this.db.string, data.password);
+            request.input('is_admin', this.db.boolean, data.is_admin);
+            request.input('is_deleted', this.db.boolean, data.is_deleted);
+            request.input('created_at', this.db.date, data.created_at);
+            request.input('updated_at', this.db.date, data.updated_at);
+            request.input('last_login_date', this.db.date, data.last_login_date);
             let result = await request.query(queryStatement);
             result = result.recordsets[0];
             if (result && result.length > 0) return result[0];
@@ -39,7 +37,7 @@ class UserService extends BaseService {
     }
 
     async addItem(item) {
-        const transaction = DB.transactionSQL(this.connection)
+        const transaction = this.db.transactionSQL(this.db.pool);
         try {
             item.updated_at = Time.getLatestTime;
             item.created_at = Time.getLatestTime;
@@ -47,20 +45,20 @@ class UserService extends BaseService {
             const data = UserModel.cleanJsonCreate(item);
 
             await transaction.begin();
-            const request = DB.requestSQL(transaction);
+            const request = this.db.requestSQL(transaction);
             let queryStatement = this.queryStatementCreate(data);
-            request.input('first_name', DB.string, data.first_name);
-            request.input('last_name', DB.string, data.last_name);
-            request.input('email', DB.string, data.email);
-            request.input('address', DB.string, data.address);
-            request.input('username', DB.string, data.username);
-            request.input('password', DB.string, data.password);
-            request.input('salt', DB.string, data.salt);
-            request.input('is_admin', DB.boolean, data.is_admin);
-            request.input('is_deleted', DB.boolean, data.is_deleted);
-            request.input('created_at', DB.date, data.created_at);
-            request.input('updated_at', DB.date, data.updated_at);
-            request.input('last_login_date', DB.date, data.last_login_date);
+            request.input('first_name', this.db.string, data.first_name);
+            request.input('last_name', this.db.string, data.last_name);
+            request.input('email', this.db.string, data.email);
+            request.input('address', this.db.string, data.address);
+            request.input('username', this.db.string, data.username);
+            request.input('password', this.db.string, data.password);
+            request.input('salt', this.db.string, data.salt);
+            request.input('is_admin', this.db.boolean, data.is_admin);
+            request.input('is_deleted', this.db.boolean, data.is_deleted);
+            request.input('created_at', this.db.date, data.created_at);
+            request.input('updated_at', this.db.date, data.updated_at);
+            request.input('last_login_date', this.db.date, data.last_login_date);
             let result = await request.query(queryStatement);
             await transaction.commit();
             result = result.recordsets[0];
@@ -76,7 +74,7 @@ class UserService extends BaseService {
     }
 
     async updateItem(id, item) {
-        const transaction = DB.transactionSQL(this.connection)
+        const transaction = this.db.transactionSQL(this.db.pool);
         try {
             item.updated_at = Time.getLatestTime;
             item.created_at = null;
@@ -84,20 +82,20 @@ class UserService extends BaseService {
             const data = UserModel.cleanJsonUpdate(item);
 
             await transaction.begin();
-            const request = DB.requestSQL(transaction);
+            const request = this.db.requestSQL(transaction);
             let queryStatement = this.queryStatementUpdate(data, `${UserModel.id} = @id`);
-            request.input('id', DB.number, id);
-            request.input('first_name', DB.string, data.first_name);
-            request.input('last_name', DB.string, data.last_name);
-            request.input('email', DB.string, data.email);
-            request.input('address', DB.string, data.address);
-            request.input('username', DB.string, data.username);
-            request.input('password', DB.string, data.password);
-            request.input('salt', DB.string, data.salt);
-            request.input('is_admin', DB.boolean, data.is_admin);
-            request.input('is_deleted', DB.boolean, data.is_deleted);
-            request.input('updated_at', DB.date, data.updated_at);
-            request.input('last_login_date', DB.date, data.last_login_date);
+            request.input('id', this.db.number, id);
+            request.input('first_name', this.db.string, data.first_name);
+            request.input('last_name', this.db.string, data.last_name);
+            request.input('email', this.db.string, data.email);
+            request.input('address', this.db.string, data.address);
+            request.input('username', this.db.string, data.username);
+            request.input('password', this.db.string, data.password);
+            request.input('salt', this.db.string, data.salt);
+            request.input('is_admin', this.db.boolean, data.is_admin);
+            request.input('is_deleted', this.db.boolean, data.is_deleted);
+            request.input('updated_at', this.db.date, data.updated_at);
+            request.input('last_login_date', this.db.date, data.last_login_date);
             await request.query(queryStatement);
             await transaction.commit();
             return {id: id};
@@ -133,6 +131,5 @@ class UserService extends BaseService {
     //     }
     // }
 }
-
 
 module.exports = UserService;

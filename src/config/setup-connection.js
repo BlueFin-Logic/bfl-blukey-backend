@@ -11,9 +11,11 @@ const TokenService = require('../common/token');
 
 module.exports = async function setupConnection(appContext) {
     try {
-        // Connect DB and create pool
-        let [pool] = await Promise.all([DB.connectDB(config.configMSSQL)]);
-        appContext.setPoolMSSQL = pool;
+        // Connect DB
+        const db = new DB(config.configMSSQL);
+        let [pool] = await Promise.all([db.connectDB(db.config)]);
+        db.pool = pool;
+        appContext.setDB = db;
 
         // Get setting token config
         const token = config.tokenJWT.token_secret;

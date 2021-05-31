@@ -13,7 +13,7 @@ module.exports.authorizedMiddleware = function authorizedMiddleware(appContext) 
             const tokenService = appContext.getTokenJWT;
             let decoded = tokenService.verify(token);
 
-            let db = appContext.getPoolMSSQL;
+            let db = appContext.getDB;
             let service = new UserService(db);
             let handler = new AuthenHandler(service);
 

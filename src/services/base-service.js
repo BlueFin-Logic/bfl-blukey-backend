@@ -1,18 +1,17 @@
-const DB = require('../database/db');
 const BaseModel = require('../model/base');
 const CustomError = require('../response_error/error');
 const {Utilities} = require('../common/utilities');
 
 class BaseService {
-    constructor(connection, table) {
-        this.connection = connection;
+    constructor(db, table) {
+        this.db = db;
         this.table = table;
     }
 
     async countTotalRecord() {
         try {
             let queryStatement = `SELECT COUNT(1) as total FROM ${this.table}`;
-            let request = DB.requestSQL(this.connection);
+            let request = this.db.requestSQL(this.db.pool);
             let result = await request.query(queryStatement);
             result = result.recordsets[0];
             if (result && result.length > 0) return result[0];
@@ -38,10 +37,10 @@ class BaseService {
                                 OFFSET @offset ROWS
                                 FETCH NEXT @limit ROWS ONLY`;
 
-            let request = DB.requestSQL(this.connection);
+            let request = this.db.requestSQL(this.db.pool);
 
-            request.input('limit', DB.number, limit);
-            request.input('offset', DB.number, offset);
+            request.input('limit', this.db.number, limit);
+            request.input('offset', this.db.number, offset);
 
             let result = await request.query(queryStatement);
             return result.recordsets[0];
@@ -55,7 +54,7 @@ class BaseService {
             let queryStatement = `SELECT ${fields}
                                 FROM ${this.table}
                                 WHERE ${condition}`;
-            let request = DB.requestSQL(this.connection);
+            let request = this.db.requestSQL(this.db.pool);
             let result = await request.query(queryStatement);
             result = result.recordsets[0];
             if (result && result.length > 0) return result[0];
@@ -102,10 +101,10 @@ class BaseService {
     }
 
     async addItem(item) {
-        const transaction = DB.transactionSQL(this.connection)
+        const transaction = this.db.transactionSQL(this.db.pool);
         try {
             await transaction.begin();
-            const request = DB.requestSQL(transaction);
+            const request = this.db.requestSQL(transaction);
             let buildCommandColumn = [];
             let buildCommandValues = [];
 
@@ -147,10 +146,10 @@ class BaseService {
     }
 
     async updateItem(id, item) {
-        const transaction = DB.transactionSQL(this.connection)
+        const transaction = this.db.transactionSQL(this.db.pool);
         try {
             await transaction.begin();
-            const request = DB.requestSQL(transaction);
+            const request = this.db.requestSQL(transaction);
             let buildCommand = [];
             for (const [key, value] of Object.entries(item)) {
                 if (value) {
@@ -168,7 +167,7 @@ class BaseService {
                                         UPDATE ${this.table}
                                         SET ${buildCommand.join(",")}
                                         WHERE ${BaseModel.id} = @id`;
-            request.input('id', DB.number, id);
+            request.input('id', this.db.number, id);
             await request.query(queryStatement);
             await transaction.commit();
             // Get ID updated successfully and return
@@ -184,11 +183,11 @@ class BaseService {
     }
 
     async deleteItem(id) {
-        const transaction = DB.transactionSQL(this.connection)
+        const transaction = this.db.transactionSQL(this.db.pool);
         try {
             await transaction.begin();
-            const request = DB.requestSQL(transaction);
-            request.input('id', DB.number, id);
+            const request = this.db.requestSQL(transaction);
+            request.input('id', this.db.number, id);
             let queryStatement = `DELETE ${this.table} WHERE ${BaseModel.id} = @id`;
             await request.query(queryStatement);
             await transaction.commit();

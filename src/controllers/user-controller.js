@@ -17,7 +17,7 @@ module.exports.listUser = function listUser(appContext) {
             // const is_admin = req.currentUserRole;
             // if (!is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let db = appContext.getPoolMSSQL;
+            let db = appContext.getDB;
             let service = new UserService(db);
             let handler = new UserHandler(service);
 
@@ -43,7 +43,7 @@ module.exports.getUserInfo = function getUserInfo(appContext) {
             // Only user can get data yourseft or admin
             const currentUserId = req.currentUserId;
 
-            let db = appContext.getPoolMSSQL;
+            let db = appContext.getDB;
             let service = new UserService(db);
             let handler = new UserHandler(service);
 
@@ -68,7 +68,7 @@ module.exports.getByIdUser = function getByIdUser(appContext) {
             // const is_admin = req.currentUserRole;
             // if (currentUserId !== id && !is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let db = appContext.getPoolMSSQL;
+            let db = appContext.getDB;
             let service = new UserService(db);
             let handler = new UserHandler(service);
 
@@ -92,7 +92,7 @@ module.exports.createUser = function createUser(appContext) {
             // const is_admin = req.currentUserRole;
             // if (!is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let db = appContext.getPoolMSSQL;
+            let db = appContext.getDB;
             let service = new UserService(db);
             let handler = new UserHandler(service);
 
@@ -117,7 +117,7 @@ module.exports.updateUser = function updateUser(appContext) {
             // const is_admin = req.currentUserRole;
             // if (currentUserId !== id && !is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let db = appContext.getPoolMSSQL;
+            let db = appContext.getDB;
             let service = new UserService(db);
             let handler = new UserHandler(service);
 
@@ -140,7 +140,7 @@ module.exports.deleteUser = function deleteUser(appContext) {
             // const is_admin = req.currentUserRole;
             // if (!is_admin) return res.status(STATUS_FORBIDDEN).json(Utilities.responseSimple('You do not permission to access!'));
 
-            let db = appContext.getPoolMSSQL;
+            let db = appContext.getDB;
             let service = new UserService(db);
             let handler = new UserHandler(service);
 
@@ -159,7 +159,7 @@ module.exports.registerUser = function registerUser(appContext) {
         try {
             const body = req.body;
 
-            let db = appContext.getPoolMSSQL;
+            let db = appContext.getDB;
             let service = new UserService(db);
             let handler = new UserHandler(service);
 

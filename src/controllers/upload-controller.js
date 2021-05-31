@@ -11,7 +11,7 @@ module.exports.upload = function upload(appContext) {
             let lam = ""
             // const body = req.body;
             //
-            // let db = appContext.getPoolMSSQL;
+            // let db = appContext.getDB;
             // let token = appContext.getTokenJWT;
             // let service = new UserService(db);
             // let handler = new AuthenHandler(service);
