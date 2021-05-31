@@ -6,7 +6,11 @@ USE [BluKey-SQL]
 
 drop table [Users]
 go
+TRUNCATE TABLE [Users];
+go
 drop table [Documents]
+go
+TRUNCATE TABLE [Documents];
 go
 CREATE TABLE [Users] (
     [id] INT PRIMARY KEY IDENTITY (1, 1),
