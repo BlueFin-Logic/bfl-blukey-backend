@@ -28,6 +28,7 @@ class UploadHandler extends BaseHandler {
             let blobSAS = storage.generateBlobSAS(containerName);
 
             return {
+                file_name: fileName,
                 url: `https://${storage.account}.blob.core.windows.net/${containerName}/${fileName}?${blobSAS}`
             };
         } catch (err) {
