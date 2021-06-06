@@ -1,6 +1,6 @@
 const BaseHandler = require('./base-handler');
 const CustomError = require('../response_error/error');
-const {Utilities} = require('../common/utilities');
+const {Time} = require('../common/time');
 const UserModel = require('../model/user');
 const TABLE_USER = UserModel.tableName
 
@@ -29,6 +29,13 @@ class AuthenHandler extends BaseHandler {
             userExist = userExist[0]
 
             if (userExist.password !== hash.hashMD5(password + userExist.salt)) throw CustomError.badRequest(`Authentication Handler`, "Invalid password!");
+
+            // Update last login date
+            let user = {
+                last_login_date: Time.getLatestTime
+            }
+
+            await this.service.updateItem(userExist.id, user);
 
             let data = {
                 id: userExist.id,

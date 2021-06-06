@@ -55,11 +55,11 @@ class UserHandler extends BaseHandler {
     async addItem(data, hash) {
         try {
             let fields = `${UserModel.id}`;
-            let condition = `${UserModel.email} = @email AND ${UserModel.is_deleted} = 0`;
+            let condition = `${UserModel.email} = @email OR ${UserModel.username} = @username AND ${UserModel.is_deleted} = 0`;
 
             let userExist = await this.service.getByCondition(fields, condition, data);
 
-            if (userExist.length > 0) throw CustomError.badRequest(`${this.table} Handler`, "Email already exist!");
+            if (userExist.length > 0) throw CustomError.badRequest(`${this.table} Handler`, "Email or username already exist!");
 
             data.salt = hash.genSalt(15);
             data.password = hash.hashMD5(data.password + data.salt);

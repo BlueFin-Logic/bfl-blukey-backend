@@ -71,8 +71,29 @@ CREATE TABLE [Documents] (
 	[updated_at] DATETIME NOT NULL,
 );
 
-Monday May 3rd 2021, 12:27:14 pm
-2021-05-03 12:37:34.3734
+CREATE TABLE [Transactions] (
+    [id] INT PRIMARY KEY IDENTITY (1, 1),
+	[user_id] INT NOT NULL,
+	[address] VARCHAR (100) NOT NULL,
+	[city] VARCHAR (30) NOT NULL,
+	[state] VARCHAR (2) NOT NULL,
+	[zip_code] VARCHAR (10) NOT NULL, 
+    [mls] VARCHAR (50) NOT NULL, 
+	[apn] VARCHAR (50) NOT NULL,
+	[listing_price] VARCHAR (50) NOT NULL,
+	[commision_rate] VARCHAR (50) NOT NULL,
+	[is_deleted] BIT DEFAULT 0, 
+	[listing_start_date] DATETIME NOT NULL,
+	[listing_end_date] DATETIME NOT NULL,
+	[created_at] DATETIME NOT NULL,
+	[updated_at] DATETIME NOT NULL,
+);
+
+
+--Listing price, Commision rate
+
+--Monday May 3rd 2021, 12:27:14 pm
+--2021-05-03 12:37:34.3734
 
 INSERT INTO [Users] ([first_name],[last_name],[email],[address],[username],[password],[salt],[is_admin],[created_at],[updated_at],[last_login_date]) 
 VALUES ('Lam','Nguyen','lam@gmail.com','Us','lam','Qq4Xh5gN0+O7/9+euNiJOQ==','$2b$15$c/34mP1e9XM1zRQ7D6UZpe',1, '2021-05-03 12:37:34.373','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')

@@ -39,9 +39,10 @@ class UserService extends BaseService {
     async addItem(item) {
         const transaction = this.db.transactionSQL(this.db.pool);
         try {
-            item.updated_at = Time.getLatestTime;
-            item.created_at = Time.getLatestTime;
-            item.last_login_date = Time.getLatestTime;
+            let timeNow = Time.getLatestTime;
+            item.updated_at = timeNow;
+            item.created_at = timeNow;
+            item.last_login_date = timeNow;
             const data = UserModel.cleanJsonCreate(item);
 
             await transaction.begin();
@@ -76,9 +77,10 @@ class UserService extends BaseService {
     async updateItem(id, item) {
         const transaction = this.db.transactionSQL(this.db.pool);
         try {
-            item.updated_at = Time.getLatestTime;
+            let timeNow = Time.getLatestTime;
+            item.updated_at = timeNow;
             item.created_at = null;
-            item.last_login_date = item.last_login_date? Time.getLatestTime : null;
+            item.last_login_date = item.last_login_date? timeNow : null;
             const data = UserModel.cleanJsonUpdate(item);
 
             await transaction.begin();
