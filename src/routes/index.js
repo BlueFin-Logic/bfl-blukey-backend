@@ -16,7 +16,7 @@ module.exports = function setupRouter(appContext) {
     // info
     router.get("/api/v1/info", middlewareAuthorize.authorizedMiddleware(appContext), userController.getUserInfo(appContext));
     // upload
-    router.post("/api/v1/upload", middlewareAuthorize.authorizedMiddleware(appContext), middlewareupload.validateUploadMiddleware(appContext), uploadController.upload(appContext));
+    router.post("/api/v1/upload", [middlewareAuthorize.authorizedMiddleware(appContext), middlewareupload.validateUploadMiddleware(appContext)], uploadController.upload(appContext));
     // user
     router.use("/api/v1/users", middlewareAuthorize.authorizedMiddleware(appContext), users(appContext));
     // router.use("/api/v1/users", users(appContext));

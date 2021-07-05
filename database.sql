@@ -21,6 +21,107 @@ CREATE TABLE [Users] (
     [username] VARCHAR (50) NOT NULL, 
 	[password] VARCHAR (255) NOT NULL,
 	[salt] VARCHAR (255) NOT NULL,
+	[is_admin] BIT DEFAULT 0 NOT NULL,
+	[is_deleted] BIT DEFAULT 0 NOT NULL, 
+	[created_at] DATETIME NOT NULL,
+	[updated_at] DATETIME NOT NULL,
+	[last_login_date] DATETIME NOT NULL,
+);
+go
+CREATE TABLE [UsersDocuments] (
+    [id] INT PRIMARY KEY IDENTITY (1, 1),
+    [container] VARCHAR(30) NOT NULL,
+	[file_name] VARCHAR(50) NOT NULL,
+    [user_id] INT NOT NULL,
+	[is_deleted] BIT DEFAULT 0 NOT NULL, 
+	[created_at] DATETIME NOT NULL,
+	[updated_at] DATETIME NOT NULL,
+);
+go
+CREATE TABLE [TransactionComments] (
+	[id] INT PRIMARY KEY IDENTITY (1, 1),
+	[transactions_id] INT NOT NULL,
+	[user_id] INT NOT NULL,
+	[commnet] TEXT NOT NULL,
+	[is_deleted] BIT DEFAULT 0 NOT NULL,
+	[created_at] DATETIME NOT NULL,
+	[updated_at] DATETIME NOT NULL,
+);
+go
+CREATE TABLE [Transactions] (
+    [id] INT PRIMARY KEY IDENTITY (1, 1),
+	[user_id] INT NOT NULL,
+	[address] VARCHAR (100) NOT NULL,
+	[city] VARCHAR (20) NOT NULL,
+	[state] VARCHAR (2) NOT NULL,
+	[zip_code] VARCHAR (10) NOT NULL,
+    [mls_id] VARCHAR (20) NOT NULL,
+	[apn] VARCHAR (50) NOT NULL,
+	[listing_price] DECIMAL(20,10) NOT NULL,
+	[commision_rate] DECIMAL(20,10) NOT NULL,
+	[buyer_name] VARCHAR (50) NOT NULL,
+	[seller_name] VARCHAR (50) NOT NULL,
+	[transactionstatus_id] TINYINT NOT NULL,
+	[listing_start_date] DATETIME NOT NULL,
+	[listing_end_date] DATETIME NOT NULL,
+	[can_complete] BIT DEFAULT 0 NOT NULL, 
+	[is_deleted] BIT DEFAULT 0 NOT NULL, 
+	[created_at] DATETIME NOT NULL,
+	[updated_at] DATETIME NOT NULL,
+);
+go
+--  Single upload -> Can detect document type
+--	User have not deleted file on UI -> file will be re-writes
+CREATE TABLE [Transactions_DocumentTypes] (
+	[id] INT PRIMARY KEY IDENTITY (1, 1),
+    [transactions_id] INT NOT NULL,
+	[documenttypes_id] INT NOT NULL,
+	[container] VARCHAR(30) NOT NULL,
+	[file_name] VARCHAR(50) NOT NULL,
+	[is_deleted] BIT DEFAULT 0 NOT NULL,
+	[created_at] DATETIME NOT NULL,
+	[updated_at] DATETIME NOT NULL,
+);
+go
+CREATE TABLE [DocumentTypes] (
+	[id] TINYINT PRIMARY KEY IDENTITY (1, 1),
+	[document_name] VARCHAR(150) NOT NULL,
+	[is_deleted] BIT DEFAULT 0 NOT NULL,
+	[created_at] DATETIME NOT NULL,
+	[updated_at] DATETIME NOT NULL,
+);
+go
+CREATE TABLE [TransactionStatus] (
+	[id] TINYINT PRIMARY KEY IDENTITY (1, 1),
+	[status_name] VARCHAR(20) NOT NULL,
+	[is_deleted] BIT DEFAULT 0 NOT NULL,
+	[created_at] DATETIME NOT NULL,
+	[updated_at] DATETIME NOT NULL,
+);
+go
+
+-- Multi upload -> Can not detect document type
+-- User have deleted file on UI by icon [x]
+--CREATE TABLE [TransactionFiles] (
+--  [id] INT PRIMARY KEY IDENTITY (1, 1),
+--  [container] VARCHAR(30) NOT NULL,
+--	[file_name] VARCHAR(50) NOT NULL,
+--  [transactions_id] INT NOT NULL,
+--	[is_deleted] BIT DEFAULT 0, 
+--	[created_at] DATETIME NOT NULL,
+--	[updated_at] DATETIME NOT NULL,
+--);
+
+
+CREATE TABLE [Users] (
+    [id] INT PRIMARY KEY IDENTITY (1, 1),
+    [first_name] VARCHAR (50) NOT NULL,
+    [last_name] VARCHAR (50) NOT NULL,
+	[email] VARCHAR (50) NOT NULL,
+	[address] VARCHAR (100) NOT NULL, 
+    [username] VARCHAR (50) NOT NULL, 
+	[password] VARCHAR (255) NOT NULL,
+	[salt] VARCHAR (255) NOT NULL,
 	[is_admin] BIT DEFAULT 0, 
 	[is_deleted] BIT DEFAULT 0, 
 	[created_at] DATETIME NULL DEFAULT GETDATE(),
@@ -42,51 +143,6 @@ CREATE TABLE [Users] (
 	[created_at] DATETIME NULL,
 	[updated_at] DATETIME NULL,
 	[last_login_date] DATETIME NULL,
-);
-go
-CREATE TABLE [Users] (
-    [id] INT PRIMARY KEY IDENTITY (1, 1),
-    [first_name] VARCHAR (50) NOT NULL,
-    [last_name] VARCHAR (50) NOT NULL,
-	[email] VARCHAR (50) NOT NULL,
-	[address] VARCHAR (100) NOT NULL, 
-    [username] VARCHAR (50) NOT NULL, 
-	[password] VARCHAR (255) NOT NULL,
-	[salt] VARCHAR (255) NOT NULL,
-	[is_admin] BIT DEFAULT 0, 
-	[is_deleted] BIT DEFAULT 0, 
-	[created_at] DATETIME NOT NULL,
-	[updated_at] DATETIME NOT NULL,
-	[last_login_date] DATETIME NOT NULL,
-);
-
-
-CREATE TABLE [Documents] (
-    [id] INT PRIMARY KEY IDENTITY (1, 1),
-    [container] VARCHAR(30) NOT NULL,
-	[file_name] VARCHAR(50) NOT NULL,
-    [user_id] INT NOT NULL,
-	[is_deleted] BIT DEFAULT 0, 
-	[created_at] DATETIME NOT NULL,
-	[updated_at] DATETIME NOT NULL,
-);
-
-CREATE TABLE [Transactions] (
-    [id] INT PRIMARY KEY IDENTITY (1, 1),
-	[user_id] INT NOT NULL,
-	[address] VARCHAR (100) NOT NULL,
-	[city] VARCHAR (30) NOT NULL,
-	[state] VARCHAR (2) NOT NULL,
-	[zip_code] VARCHAR (10) NOT NULL, 
-    [mls] VARCHAR (50) NOT NULL, 
-	[apn] VARCHAR (50) NOT NULL,
-	[listing_price] VARCHAR (50) NOT NULL,
-	[commision_rate] VARCHAR (50) NOT NULL,
-	[is_deleted] BIT DEFAULT 0, 
-	[listing_start_date] DATETIME NOT NULL,
-	[listing_end_date] DATETIME NOT NULL,
-	[created_at] DATETIME NOT NULL,
-	[updated_at] DATETIME NOT NULL,
 );
 
 
@@ -110,6 +166,33 @@ INSERT INTO [Documents] ([container], [file_name], [user_id], [created_at], [upd
 
 SELECT * 
 FROM [Documents]
+
+drop table [UserTest]
+drop table [DocumentTest]
+
+TRUNCATE TABLE [UserTest];
+TRUNCATE TABLE [DocumentTest];
+
+SELECT * 
+FROM [UserTest]
+
+SELECT [firstName], [lastName], COUNT([cash]) AS [total_cash] 
+FROM [UserTest] AS [UserTest]
+GROUP BY [firstName], [lastName]
+
+SELECT * 
+FROM [DocumentTest]
+
+INSERT INTO [UserTest] ([firstName], [lastName]) VALUES ('lam', 'lam')
+INSERT INTO [UserTest] ([firstName], [lastName]) VALUES ('nhan', 'nhan')
+
+INSERT INTO [DocumentTest] ([fileName], [user_id]) VALUES ('lam', 1)
+INSERT INTO [DocumentTest] ([fileName], [user_id]) VALUES ('lam2', 1)
+INSERT INTO [DocumentTest] ([fileName], [user_id]) VALUES ('nhan', 2)
+
+INSERT INTO [DocumentTest] ([fileName], [UserTestID]) VALUES ('lam', 1)
+INSERT INTO [DocumentTest] ([fileName], [UserTestID]) VALUES ('lam2', 1)
+INSERT INTO [DocumentTest] ([fileName], [UserTestID]) VALUES ('nhan', 2)
 
 SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON 
 UPDATE [Users] 
@@ -207,3 +290,8 @@ WHERE [email] = @email AND [is_deleted] = 0
 SELECT [id],[container],[file_name]
 FROM [Documents]
 WHERE [user_id] = 1 AND [is_deleted] = 0
+
+
+SELECT [DocumentTest].[id], [DocumentTest].[fileName], [DocumentTest].[user_id], [DocumentTest].[UserTestId], [UserTest].[id] AS [UserTest.id], [UserTest].[firstName] AS [UserTest.firstName], [UserTest].[lastName] AS [UserTest.lastName], [UserTest].[age] AS [UserTest.age], [UserTest].[cash] AS [UserTest.cash] 
+FROM [DocumentTest] AS [DocumentTest] LEFT OUTER JOIN [UserTest] AS [UserTest] 
+ON [DocumentTest].[UserTestId] = [UserTest].[id]
