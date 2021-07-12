@@ -1,0 +1,39 @@
+{
+  "name": "bluefin-logic-real-estate-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "dependencies": {
+    "@azure/storage-blob": "^12.5.0",
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "file-type": "^16.5.0",
+    "helmet": "^4.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.1",
+    "multer": "^1.4.2",
+    "nodemailer": "^6.6.2",
+    "object-hash": "^2.2.0",
+    "sequelize": "^6.6.5",
+    "tedious": "^11.0.9"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node .",
+    "dev": "nodemon --watch src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://b51be715e7843012558437ae0102fa555e775c92@github.com/hlamnguyen/bluefin-logic-real-estate-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hlamnguyen/bluefin-logic-real-estate-backend/issues"
+  },
+  "homepage": "https://github.com/hlamnguyen/bluefin-logic-real-estate-backend#readme"
+}
