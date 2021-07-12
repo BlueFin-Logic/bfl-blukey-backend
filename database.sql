@@ -2,13 +2,18 @@ drop database blukey
 
 create database blukey
 
+USE blukey
+go
+
+create database blukeydev
+
 USE [BluKey-SQL]
 
-drop table [Users]
+drop table [User]
 go
-TRUNCATE TABLE [Users];
+TRUNCATE TABLE [User];
 go
-drop table [Documents]
+drop table [DocumentUser]
 go
 TRUNCATE TABLE [Documents];
 go
@@ -56,9 +61,9 @@ CREATE TABLE [Transactions] (
 	[state] VARCHAR (2) NOT NULL,
 	[zip_code] VARCHAR (10) NOT NULL,
     [mls_id] VARCHAR (20) NOT NULL,
-	[apn] VARCHAR (50) NOT NULL,
+	[apn] VARCHAR (10) NOT NULL,
 	[listing_price] DECIMAL(20,10) NOT NULL,
-	[commision_rate] DECIMAL(20,10) NOT NULL,
+	[commission_amount] DECIMAL(20,10) NOT NULL,
 	[buyer_name] VARCHAR (50) NOT NULL,
 	[seller_name] VARCHAR (50) NOT NULL,
 	[transactionstatus_id] TINYINT NOT NULL,
@@ -86,6 +91,7 @@ go
 CREATE TABLE [DocumentTypes] (
 	[id] TINYINT PRIMARY KEY IDENTITY (1, 1),
 	[document_name] VARCHAR(150) NOT NULL,
+	[is_required] BIT DEFAULT 0 NOT NULL,
 	[is_deleted] BIT DEFAULT 0 NOT NULL,
 	[created_at] DATETIME NOT NULL,
 	[updated_at] DATETIME NOT NULL,
@@ -159,19 +165,56 @@ VALUES ('Nathan','Nguyen','nathan@gmail.com','Us','nathan','QQV9maR9RLIh2CfSpTnU
 go
 INSERT INTO [Users] ([first_name],[last_name],[email],[address],[username],[password],[salt],[is_admin],[created_at],[updated_at],[last_login_date]) 
 VALUES ('Nhan','Nguyen','nhan@gmail.com','Us','nhan','D5SsAvX8FIkqCwQp+tdqxA==','$2b$15$BkH9RVfydKHI3pLl0BCg/e',+1, '2021-05-03 12:37:34.373','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
+----------------------------------------------
+INSERT INTO [User] ([firstName],[lastName],[email],[address],[userName],[password],[isAdmin],[lastLoginDate],[createdAt],[updatedAt]) 
+VALUES ('Lam','Nguyen','lam@gmail.com','Us','lam2','$2b$15$c/34mP1e9XM1zRQ7D6UZpe',1, '2021-05-03 12:37:34.373','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
+go
+SELECT [firstName], [lastName], [email], [address], [userName], [lastLoginDate] FROM [dbo].[User] AS [User] WHERE ([User].[deletedAt] IS NULL) ORDER BY [User].[id] OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY
+
+INSERT INTO [Users] ([first_name],[last_name],[email],[address],[username],[password],[salt],[is_admin],[created_at],[updated_at],[last_login_date]) 
+VALUES ('Nathan','Nguyen','nathan@gmail.com','Us','nathan','QQV9maR9RLIh2CfSpTnUGw==','$2b$15$55yyKez0y1tqEe.pOIOIbO',1, '2021-05-03 12:37:34.373','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
+go
+INSERT INTO [Users] ([first_name],[last_name],[email],[address],[username],[password],[salt],[is_admin],[created_at],[updated_at],[last_login_date]) 
+VALUES ('Nhan','Nguyen','nhan@gmail.com','Us','nhan','D5SsAvX8FIkqCwQp+tdqxA==','$2b$15$BkH9RVfydKHI3pLl0BCg/e',+1, '2021-05-03 12:37:34.373','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
 
 INSERT INTO [Documents] ([container], [file_name], [user_id], [created_at], [updated_at]) VALUES ('pdf','a.pdf','1','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
 INSERT INTO [Documents] ([container], [file_name], [user_id], [created_at], [updated_at]) VALUES ('pdf','b.pdf','1','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
 INSERT INTO [Documents] ([container], [file_name], [user_id], [created_at], [updated_at]) VALUES ('pdf','c.pdf','1','2021-05-03 12:37:34.373','2021-05-03 12:37:34.373')
 
+
+UPDATE [dbo].[User] SET [password]='25c60f7fadb26d10a4afdfb523333ca2' WHERE ([deletedAt] IS NULL AND [id] = 1)
+
+UPDATE [dbo].[User] SET [email]='a' WHERE ([deletedAt] IS NULL AND [id] = 1)
+
+
+SELECT *
+FROM [User]
+
 SELECT * 
 FROM [Documents]
 
-drop table [UserTest]
+
 drop table [DocumentTest]
+drop table [UserClassTest]
+drop table [UserTest]
+drop table [ClassTest]
+drop table [DateTest]
+
+drop table [DocumentUser]
+drop table [User]
+
+
+SELECT * 
+FROM [DocumentUser]
 
 TRUNCATE TABLE [UserTest];
 TRUNCATE TABLE [DocumentTest];
+
+SELECT * 
+FROM [UserClassTest]
+
+SELECT * 
+FROM [DateTest]
 
 SELECT * 
 FROM [UserTest]
@@ -185,7 +228,7 @@ FROM [DocumentTest]
 
 INSERT INTO [UserTest] ([firstName], [lastName]) VALUES ('lam', 'lam')
 INSERT INTO [UserTest] ([firstName], [lastName]) VALUES ('nhan', 'nhan')
-
+Go
 INSERT INTO [DocumentTest] ([fileName], [user_id]) VALUES ('lam', 1)
 INSERT INTO [DocumentTest] ([fileName], [user_id]) VALUES ('lam2', 1)
 INSERT INTO [DocumentTest] ([fileName], [user_id]) VALUES ('nhan', 2)
@@ -193,6 +236,13 @@ INSERT INTO [DocumentTest] ([fileName], [user_id]) VALUES ('nhan', 2)
 INSERT INTO [DocumentTest] ([fileName], [UserTestID]) VALUES ('lam', 1)
 INSERT INTO [DocumentTest] ([fileName], [UserTestID]) VALUES ('lam2', 1)
 INSERT INTO [DocumentTest] ([fileName], [UserTestID]) VALUES ('nhan', 2)
+
+
+DELETE FROM [UserTest] WHERE id = 1;
+
+UPDATE [DocumentTest]
+SET user_id = 2
+WHERE id = 1;
 
 SET QUOTED_IDENTIFIER OFF SET ANSI_NULLS ON 
 UPDATE [Users] 
@@ -216,9 +266,10 @@ FOR JSON PATH, INCLUDE_NULL_VALUES
 
 
 
-SELECT * FROM [Documents]
+SELECT * FROM [DocumentUser]
+truncate table [DocumentUser]
 
-SELECT * FROM [Users]
+SELECT * FROM [User]
 
 SET QUOTED_IDENTIFIER ON
 
