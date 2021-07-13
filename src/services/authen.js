@@ -10,7 +10,7 @@ class AuthenService extends BaseService {
 
     async login(item, token) {
         try {
-            let username = item.username;
+            let username = item.userName;
             let password = item.password;
 
             let fields = ['id', 'firstName', 'lastName', 'email', 'address', 'userName', 'password', 'isAdmin','lastLoginDate'];
@@ -34,10 +34,12 @@ class AuthenService extends BaseService {
             }
 
             return {
-                access_token: token.sign(data, userExist.email),
-                refresh_token: token.sign(data, userExist.email, "30 days"),
+                accessToken: token.sign(data, userExist.email),
+                refreshToken: token.sign(data, userExist.email, "30 days"),
                 user: {
                     id: userExist.id,
+                    firstName: userExist.firstName,
+                    lastName: userExist.lastName,
                     fullName: userExist.fullName,
                     email: userExist.email,
                     address: userExist.address,

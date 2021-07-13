@@ -58,7 +58,7 @@ CREATE TABLE [Transactions] (
     [mls_id] VARCHAR (20) NOT NULL,
 	[apn] VARCHAR (50) NOT NULL,
 	[listing_price] DECIMAL(20,10) NOT NULL,
-	[commision_rate] DECIMAL(20,10) NOT NULL,
+	[commission_amount] DECIMAL(20,10) NOT NULL,
 	[buyer_name] VARCHAR (50) NOT NULL,
 	[seller_name] VARCHAR (50) NOT NULL,
 	[transactionstatus_id] TINYINT NOT NULL,
@@ -216,7 +216,9 @@ FOR JSON PATH, INCLUDE_NULL_VALUES
 
 
 
-SELECT * FROM [Documents]
+SELECT * FROM [DocumentUser]
+
+truncate table [DocumentUser]
 
 SELECT * FROM [Users]
 
@@ -295,3 +297,11 @@ WHERE [user_id] = 1 AND [is_deleted] = 0
 SELECT [DocumentTest].[id], [DocumentTest].[fileName], [DocumentTest].[user_id], [DocumentTest].[UserTestId], [UserTest].[id] AS [UserTest.id], [UserTest].[firstName] AS [UserTest.firstName], [UserTest].[lastName] AS [UserTest.lastName], [UserTest].[age] AS [UserTest.age], [UserTest].[cash] AS [UserTest.cash] 
 FROM [DocumentTest] AS [DocumentTest] LEFT OUTER JOIN [UserTest] AS [UserTest] 
 ON [DocumentTest].[UserTestId] = [UserTest].[id]
+
+DROP TABLE TransactionComment
+DROP TABLE TransactionDocumentType
+DROP TABLE DocumentType
+DROP TABLE [Transaction]
+DROP TABLE TransactionStatus
+DROP TABLE DocumentUser
+DROP TABLE [User]

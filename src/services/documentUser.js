@@ -1,5 +1,6 @@
 const BaseService = require('../services/base');
 const CustomError = require('../common/error');
+const time = require('../helper/time');
 
 class DocumentUserService extends BaseService {
     constructor(service, storage) {
@@ -13,8 +14,8 @@ class DocumentUserService extends BaseService {
             const folder = currentUserId;
             await this.storage.createContainersIfNotExists(this.containerName);
 
-            // TODO: Need to add number at the end name and format extension name file.
-            const fileName = `${currentUserId}_${originalNameFile}`;
+            // TODO: Format extension name file.
+            const fileName = `${currentUserId}_${time.getCurrentUnixTimestamp()}_${originalNameFile}`;
             await this.storage.uploadDataOnBlob(this.containerName, dataFile, fileName, folder, mimeTypeFile);
 
             let documentUser = {

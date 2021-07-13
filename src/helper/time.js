@@ -16,3 +16,11 @@ module.exports.getLatestTimeUTC = () => {
         throw err
     }
 }
+
+module.exports.getCurrentUnixTimestamp = () => {
+    try {
+        return moment().valueOf();
+    } catch (err) {
+        throw err
+    }
+}

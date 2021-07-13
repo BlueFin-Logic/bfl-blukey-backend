@@ -6,6 +6,7 @@ const uploadController = require("../controllers/upload");
 const middlewareAuthorize = require("../middleware/authorize");
 const middlewareUpload = require("../middleware/upload");
 const documentUser = require("./documentUser");
+const transaction = require("./transaction");
 
 module.exports = function setupRouter(appContext) {
     // login
@@ -16,5 +17,7 @@ module.exports = function setupRouter(appContext) {
     router.use("/api/v1/users", middlewareAuthorize.authorize(appContext), users(appContext));
     // documentUser
     router.use("/api/v1/documentUsers", middlewareAuthorize.authorize(appContext), documentUser(appContext));
+    // transaction
+    // router.use("/api/v1/transactions", middlewareAuthorize.authorize(appContext), transaction(appContext));
     return router;
 }
