@@ -10,7 +10,6 @@ class UserService extends BaseService {
 
     async getAll(page, limit) {
         try {
-            // const {total, users} = await this.repository.getAll(page, limit);
             const {count, rows} = await this.repository.getAll(page, limit);
             return {
                 total: count,
@@ -74,7 +73,7 @@ class UserService extends BaseService {
                     throw CustomError.badRequest(`${this.tableName} Handler`, "Password is not correct!");
                 }
             } else {
-                data.password = null;
+                delete data.password;
             }
 
             // Update user

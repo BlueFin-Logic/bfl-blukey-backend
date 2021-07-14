@@ -18,6 +18,6 @@ module.exports = function setupRouter(appContext) {
     // documentUser
     router.use("/api/v1/documentUsers", middlewareAuthorize.authorize(appContext), documentUser(appContext));
     // transaction
-    // router.use("/api/v1/transactions", middlewareAuthorize.authorize(appContext), transaction(appContext));
+    router.use("/api/v1/transactions", middlewareAuthorize.authorize(appContext), transaction(appContext));
     return router;
 }

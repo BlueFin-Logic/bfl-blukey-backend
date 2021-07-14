@@ -9,13 +9,13 @@ module.exports = (sequelize, DataTypes, Model) => {
 
     // Relationship [User] 1-n [DocumentUser]
     User.hasMany(DocumentUser, {
-        as: "DocumentUsers",
+        as: "documentUsers",
         foreignKey: "userId",
         onDelete: 'NO ACTION',
         onUpdate: 'CASCADE'
     });
     DocumentUser.belongsTo(User, {
-        as: "User",
+        as: "user",
         foreignKey: "userId",
         onDelete: 'NO ACTION',
         onUpdate: 'CASCADE'
@@ -23,13 +23,13 @@ module.exports = (sequelize, DataTypes, Model) => {
 
     // Relationship [User] 1-n [Transaction]
     User.hasMany(Transaction, {
-        as: "Transactions",
+        as: "transactions",
         foreignKey: "userId",
         onDelete: 'NO ACTION',
         onUpdate: 'CASCADE'
     });
     Transaction.belongsTo(User, {
-        as: "User",
+        as: "user",
         foreignKey: "userId",
         onDelete: 'NO ACTION',
         onUpdate: 'CASCADE'
@@ -37,13 +37,13 @@ module.exports = (sequelize, DataTypes, Model) => {
 
     // Relationship [User] 1-n [TransactionComment]
     User.hasMany(TransactionComment, {
-        as: "TransactionComments",
+        as: "transactionComments",
         foreignKey: "userId",
         onDelete: 'NO ACTION',
         onUpdate: 'CASCADE'
     });
     TransactionComment.belongsTo(User, {
-        as: "User",
+        as: "user",
         foreignKey: "userId",
         onDelete: 'NO ACTION',
         onUpdate: 'CASCADE'
@@ -79,13 +79,13 @@ module.exports = (sequelize, DataTypes, Model) => {
 
     // Relationship [TransactionStatus] 1-n [Transaction]
     TransactionStatus.hasMany(Transaction, {
-        as: "Transactions",
+        as: "transactions",
         foreignKey: "transactionStatusId",
         onDelete: 'NO ACTION',
         onUpdate: 'CASCADE'
     });
     Transaction.belongsTo(TransactionStatus, {
-        as: "TransactionStatus",
+        as: "transactionStatus",
         foreignKey: "transactionStatusId",
         onDelete: 'NO ACTION',
         onUpdate: 'CASCADE'
@@ -93,13 +93,13 @@ module.exports = (sequelize, DataTypes, Model) => {
 
     // Relationship [Transaction] 1-n [TransactionComment]
     Transaction.hasMany(TransactionComment, {
-        as: "TransactionComments",
+        as: "transactionComments",
         foreignKey: "transactionId",
         onDelete: 'NO ACTION',
         onUpdate: 'CASCADE'
     });
     TransactionComment.belongsTo(Transaction, {
-        as: "Transaction",
+        as: "transaction",
         foreignKey: "transactionId",
         onDelete: 'NO ACTION',
         onUpdate: 'CASCADE'

@@ -10,17 +10,17 @@ class AuthenService extends BaseService {
 
     async login(item, token) {
         try {
-            let username = item.userName;
-            let password = item.password;
+            let itemUserName = item.userName;
+            let itemPassword = item.password;
 
-            let fields = ['id', 'firstName', 'lastName', 'email', 'address', 'userName', 'password', 'isAdmin','lastLoginDate'];
-            let userExist = await this.repository.getOne({userName: username}, fields);
+            let fields = ['id', 'firstName', 'lastName', 'email', 'address', 'userName', 'password', 'isAdmin', 'lastLoginDate'];
+            let userExist = await this.repository.getOne({userName: itemUserName}, fields);
 
             // Check user is exist.
             if (!userExist) throw CustomError.badRequest(`Authentication Handler`, "User is not found!");
 
             // Check user correct pass.
-            if (userExist.password !== hash.hashPassword(userExist.userName, password)) throw CustomError.badRequest(`Authentication Handler`, "Invalid password!");
+            if (userExist.password !== hash.hashPassword(userExist.userName, itemPassword)) throw CustomError.badRequest(`Authentication Handler`, "Invalid password!");
 
             // Update last login date
             let user = {
@@ -33,19 +33,14 @@ class AuthenService extends BaseService {
                 isAdmin: userExist.isAdmin
             }
 
+            let {password, ...rest} = userExist.toJSON()
+
             return {
                 accessToken: token.sign(data, userExist.email),
                 refreshToken: token.sign(data, userExist.email, "30 days"),
                 user: {
-                    id: userExist.id,
-                    firstName: userExist.firstName,
-                    lastName: userExist.lastName,
                     fullName: userExist.fullName,
-                    email: userExist.email,
-                    address: userExist.address,
-                    userName: userExist.userName,
-                    isAdmin: userExist.isAdmin,
-                    lastLoginDate: user.lastLoginDate
+                    ...rest
                 }
             }
         } catch (err) {

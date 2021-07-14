@@ -24,3 +24,12 @@ module.exports.getCurrentUnixTimestamp = () => {
         throw err
     }
 }
+
+module.exports.formatTimeUTCToString = (data) => {
+    try {
+        return moment.utc(data).format(formatTime);
+    } catch (err) {
+        throw err
+    }
+}
+

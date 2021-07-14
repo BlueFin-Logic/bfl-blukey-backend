@@ -64,13 +64,13 @@ module.exports = (sequelize, DataTypes, Model) => {
             }
         },
         listingPrice: {
-            type: DataTypes.DECIMAL(20,10),
+            type: DataTypes.DECIMAL(20,4),
             allowNull: false,
             isAlphanumeric: true,
             min: 0
         },
         commissionAmount: {
-            type: DataTypes.DECIMAL(20,10),
+            type: DataTypes.DECIMAL(20,4),
             allowNull: false,
             isAlphanumeric: true,
             min: 0

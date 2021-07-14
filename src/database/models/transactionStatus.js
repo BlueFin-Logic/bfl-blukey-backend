@@ -9,10 +9,10 @@ module.exports = (sequelize, DataTypes, Model) => {
             primaryKey: true
         },
         name: {
-            type: DataTypes.STRING(10),
+            type: DataTypes.STRING(20),
             allowNull: false,
             validate: {
-                len: [1, 10]
+                len: [1, 20]
             }
         },
         createdAt: {

@@ -7,7 +7,7 @@ class BaseRepository {
         this.models = models;
     }
 
-    getAll(page, limit, fields, conditions = null) {
+    getAll(page, limit, fields, conditions = null, include = null) {
         try {
             if (page < 1) page = 1;
             if (limit < 1) limit = 5;
@@ -16,6 +16,7 @@ class BaseRepository {
             return this.table.findAndCountAll({
                 attributes: fields,
                 where: conditions,
+                include: include,
                 offset: offset,
                 limit: limit
             });

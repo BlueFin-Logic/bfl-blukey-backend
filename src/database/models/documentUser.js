@@ -1,5 +1,8 @@
 module.exports = (sequelize, DataTypes, Model) => {
     class DocumentUser extends Model {
+        accessUrl(storageAccount, blobSAS) {
+            return `https://${storageAccount}.blob.core.windows.net/${this.container}/${this.folder}/${this.fileName}?${blobSAS}`;
+        }
     }
     DocumentUser.init({
         id: {

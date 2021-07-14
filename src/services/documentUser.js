@@ -25,13 +25,13 @@ class DocumentUserService extends BaseService {
                 userId: currentUserId
             };
 
-            await this.repository.addItem(documentUser);
+            let document = await this.repository.addItem(documentUser);
 
             let blobSAS = this.storage.generateBlobSAS(this.containerName, 2);
 
             return {
-                file_name: fileName,
-                url: `https://${this.storage.account}.blob.core.windows.net/${this.containerName}/${documentUser.folder}/${documentUser.fileName}?${blobSAS}`
+                url: document.accessUrl(this.storage.account, blobSAS),
+                fileName: fileName
             };
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
@@ -42,16 +42,15 @@ class DocumentUserService extends BaseService {
     async getDocumentInfoByUserId(id) {
         try {
             // Get documents belong to user just have inserted.
-            let documents = await this.repository.getByCondition({ userId: id });
+            let documents = await this.repository.getByCondition({userId: id});
             if (documents.length === 0) throw CustomError.badRequest(`${this.tableName} Handler`, "Documents belong to user is not found!");
 
             // documentsURL
             return documents.map(document => {
                 let blobSAS = this.storage.generateBlobSAS(document.container, 60);
-                document = document.toJSON();
                 return {
-                    ...document,
-                    url: `https://${this.storage.account}.blob.core.windows.net/${this.containerName}/${document.folder}/${document.fileName}?${blobSAS}`
+                    url: document.accessUrl(this.storage.account, blobSAS),
+                    ...document.toJSON()
                 }
             });
         } catch (err) {

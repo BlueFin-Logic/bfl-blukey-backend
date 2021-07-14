@@ -9,7 +9,8 @@ class UserRepository extends BaseRepository {
     }
 
     getAll(page, limit, conditions = null) {
-        const fields = defaultFields;
+        let fields = defaultFields;
+        fields.push('isAdmin');
         return super.getAll(page, limit, fields, conditions);
     }
 

@@ -305,3 +305,18 @@ DROP TABLE [Transaction]
 DROP TABLE TransactionStatus
 DROP TABLE DocumentUser
 DROP TABLE [User]
+
+SELECT * 
+FROM DocumentUser
+
+SELECT * 
+FROM TransactionStatus
+
+SELECT * 
+FROM [Transaction]
+
+SELECT * 
+FROM DocumentType
+
+SELECT * 
+FROM [User]
