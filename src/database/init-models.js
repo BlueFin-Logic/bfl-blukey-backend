@@ -51,7 +51,7 @@ module.exports = (sequelize, DataTypes, Model) => {
 
     // Relationship [Transaction] n-n [DocumentType] -> [TransactionDocumentType]
     Transaction.belongsToMany(DocumentType, {
-        as: 'documentTypeId_DocumentTypes',
+        as: 'documentTypes',
         through: {
             model: TransactionDocumentType,
             unique: false,
@@ -64,7 +64,7 @@ module.exports = (sequelize, DataTypes, Model) => {
         onUpdate: 'CASCADE'
     });
     DocumentType.belongsToMany(Transaction, {
-        as: 'transactionId_Transactions',
+        as: 'transactions',
         through: {
             model: TransactionDocumentType,
             unique: false,
@@ -73,6 +73,34 @@ module.exports = (sequelize, DataTypes, Model) => {
         foreignKey: 'documentTypeId',
         otherKey: 'transactionId',
         timestamps: true,
+        onDelete: 'NO ACTION',
+        onUpdate: 'CASCADE'
+    });
+    
+    // Relationship [Transaction] 1-n [TransactionDocumentType]
+    Transaction.hasMany(TransactionDocumentType, {
+        as: "transactionDocumentTypes",
+        foreignKey: "transactionId",
+        onDelete: 'NO ACTION',
+        onUpdate: 'CASCADE'
+    });
+    TransactionDocumentType.belongsTo(Transaction, {
+        as: "transaction",
+        foreignKey: "transactionId",
+        onDelete: 'NO ACTION',
+        onUpdate: 'CASCADE'
+    });
+
+    // Relationship [DocumentType] 1-n [TransactionDocumentType]
+    DocumentType.hasMany(TransactionDocumentType, {
+        as: "transactionDocumentTypes",
+        foreignKey: "documentTypeId",
+        onDelete: 'NO ACTION',
+        onUpdate: 'CASCADE'
+    });
+    TransactionDocumentType.belongsTo(DocumentType, {
+        as: "documentType",
+        foreignKey: "documentTypeId",
         onDelete: 'NO ACTION',
         onUpdate: 'CASCADE'
     });

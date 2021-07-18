@@ -18,7 +18,10 @@ class BaseRepository {
                 where: conditions,
                 include: include,
                 offset: offset,
-                limit: limit
+                limit: limit,
+                order: [
+                    ['updatedAt', 'DESC'],
+                ],
             });
         } catch (error) {
             throw CustomError.cannotListEntity(`${this.tableName} Repository`, this.tableName, error);
@@ -53,7 +56,10 @@ class BaseRepository {
             return this.table.findAll({
                 attributes: fields,
                 where: conditions,
-                include: include
+                include: include,
+                order: [
+                    ['updatedAt', 'DESC'],
+                ],
             });
         } catch (error) {
             throw CustomError.cannotListEntity(`${this.tableName} Repository`, this.tableName, error);
@@ -91,6 +97,14 @@ class BaseRepository {
             });
         } catch (error) {
             throw CustomError.cannotUpdateEntity(`${this.tableName} Repository`, this.tableName, error);
+        }
+    }
+
+    countItem(conditions) {
+        try {
+            return this.table.count(conditions);
+        } catch (error) {
+            throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);
         }
     }
 }

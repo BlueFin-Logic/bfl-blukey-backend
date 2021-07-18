@@ -15,7 +15,8 @@ const defaultFields = [
     'canComplete',
     'listingStartDate',
     'listingEndDate',
-    'createdAt'
+    'createdAt',
+    'updatedAt'
 ];
 const time = require('../helper/time');
 
@@ -24,9 +25,34 @@ class TransactionRepository extends BaseRepository {
         super(models.Transaction, models);
     }
 
-    getAll(page, limit, conditions = null, include = null) {
-        let fields = defaultFields;
-        return super.getAll(page, limit, fields, conditions, include);
+    getAll(page, limit, fields = null, conditions = null, include = null) {
+        try {
+            if (!fields) fields = defaultFields;
+            if (page < 1) page = 1;
+            if (limit < 1) limit = 5;
+            if (limit > 100) limit = 100;
+            const offset = (page - 1) * limit;
+            return this.table.findAll({
+                attributes: fields,
+                where: conditions,
+                include: include,
+                offset: offset,
+                limit: limit,
+                order: [
+                    ['updatedAt', 'DESC'],
+                ],
+            });
+        } catch (error) {
+            throw CustomError.cannotListEntity(`${this.tableName} Repository`, this.tableName, error);
+        }
+    }
+
+    countDocumentTypeRequired(required = true) {
+        try {
+            return this.models.DocumentType.count({ where: { isRequired: required } });
+        } catch (error) {
+            throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);
+        }
     }
     //
     // getById(id, fields = null, include = null) {

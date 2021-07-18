@@ -1,6 +1,6 @@
 const BaseService = require('./base');
 const CustomError = require('../common/error');
-const {Op} = require('sequelize');
+const {Op, Sequelize} = require('sequelize');
 
 class TransactionService extends BaseService {
     constructor(repository) {
@@ -13,18 +13,42 @@ class TransactionService extends BaseService {
                 {
                     model: this.repository.models.User,
                     as: "user",
-                    attributes: ["firstName", "lastName"],
+                    attributes: ["id", "firstName", "lastName", "deactivatedAt"],
+                    paranoid: false
                 },
                 {
                     model: this.repository.models.TransactionStatus,
                     as: "transactionStatus",
-                    attributes: ["name"],
+                    attributes: ["name"]
+                },
+                {
+                    model: this.repository.models.DocumentType,
+                    as: "documentTypes",
+                    attributes: ["id", "name", "isRequired"],
+                    through: {
+                        as: "transactionDocumentTypes",
+                        attributes: ['fileName']
+                    },
+                    where: {
+                        isRequired: true
+                    }
                 }
             ];
-            const {count, rows} = await this.repository.getAll(page, limit, null, include);
+
+            const [transactions, totalTrans, totalDocumentRequired] = await Promise.all([
+                this.repository.getAll(page, limit, null, null, include),
+                this.repository.countItem({ col: 'id' }),
+                this.repository.countDocumentTypeRequired(true),
+            ]);
+
             return {
-                total: count,
-                data: rows
+                total: totalTrans,
+                data: transactions.map(transaction => {
+                    return {
+                        documentUploadedRequired: `${transaction.documentTypes.length}/${totalDocumentRequired}`,
+                        ...transaction.toJSON()
+                    }
+                })
             };
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;

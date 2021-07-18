@@ -87,7 +87,8 @@ module.exports = (sequelize, DataTypes, Model) => {
         sequelize,
         schema: 'dbo',
         timestamps: true,
-        paranoid: true
+        paranoid: true,
+        deletedAt: 'deactivatedAt'
     })
     return User;
 }

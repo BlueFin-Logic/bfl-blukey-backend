@@ -1,6 +1,6 @@
 const BaseRepository = require('./base');
 const CustomError = require('../common/error');
-const defaultFields = ['id', 'firstName', 'lastName', 'email', 'address', 'userName', 'lastLoginDate'];
+const defaultFields = ['id', 'firstName', 'lastName', 'email', 'address', 'userName', 'lastLoginDate', 'updatedAt'];
 const time = require('../helper/time');
 
 class UserRepository extends BaseRepository {

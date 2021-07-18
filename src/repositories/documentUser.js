@@ -1,6 +1,6 @@
 const BaseRepository = require('./base');
 const CustomError = require('../common/error');
-const defaultFields = ['id', 'container', 'folder', 'fileName'];
+const defaultFields = ['id', 'container', 'folder', 'fileName', 'updatedAt'];
 
 class DocumentUserRepository extends BaseRepository {
     constructor(models) {

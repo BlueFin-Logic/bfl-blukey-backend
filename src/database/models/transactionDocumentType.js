@@ -1,5 +1,8 @@
 module.exports = (sequelize, DataTypes, Model) => {
     class TransactionDocumentType extends Model {
+        accessUrl(storageAccount, blobSAS) {
+            return `https://${storageAccount}.blob.core.windows.net/${this.container}/${this.folder}/${this.fileName}?${blobSAS}`;
+        }
     }
     TransactionDocumentType.init({
         transactionId: {

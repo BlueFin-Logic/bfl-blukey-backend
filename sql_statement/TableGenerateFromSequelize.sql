@@ -11,7 +11,7 @@ IF OBJECT_ID('[dbo].[User]', 'U') IS NULL CREATE TABLE [dbo].[User]
     [lastLoginDate] DATETIMEOFFSET NOT NULL,
     [createdAt] DATETIMEOFFSET NOT NULL,
     [updatedAt] DATETIMEOFFSET NOT NULL,
-    [deletedAt] DATETIMEOFFSET NULL,
+    [deactivatedAt] DATETIMEOFFSET NULL,
     PRIMARY KEY ([id])
 );
 
@@ -34,7 +34,7 @@ IF OBJECT_ID('[dbo].[DocumentUser]', 'U') IS NULL CREATE TABLE [dbo].[DocumentUs
 IF OBJECT_ID('[dbo].[TransactionStatus]', 'U') IS NULL CREATE TABLE [dbo].[TransactionStatus]
 (
     [id] SMALLINT NOT NULL IDENTITY(1,1) ,
-    [name] NVARCHAR(10) NOT NULL,
+    [name] NVARCHAR(20) NOT NULL,
     [createdAt] DATETIMEOFFSET NOT NULL,
     [updatedAt] DATETIMEOFFSET NOT NULL,
     [deletedAt] DATETIMEOFFSET NULL,
@@ -52,8 +52,8 @@ IF OBJECT_ID('[dbo].[Transaction]', 'U') IS NULL CREATE TABLE [dbo].[Transaction
     [zipCode] NVARCHAR(10) NOT NULL,
     [mlsId] NVARCHAR(20) NOT NULL,
     [apn] NVARCHAR(50) NOT NULL,
-    [listingPrice] DECIMAL(20,10) NOT NULL,
-    [commissionAmount] DECIMAL(20,10) NOT NULL,
+    [listingPrice] DECIMAL(20,4) NOT NULL,
+    [commissionAmount] DECIMAL(20,4) NOT NULL,
     [buyerName] NVARCHAR(50) NOT NULL,
     [sellerName] NVARCHAR(50) NOT NULL,
     [canComplete] BIT NOT NULL DEFAULT 0,

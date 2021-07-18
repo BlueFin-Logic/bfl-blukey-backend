@@ -320,3 +320,12 @@ FROM DocumentType
 
 SELECT * 
 FROM [User]
+
+SELECT * 
+FROM [TransactionDocumentType]
+
+SELECT COUNT(transactionId)
+FROM TransactionDocumentType AS transactionDocumentType
+INNER JOIN DocumentType AS documentType ON documentType.id = transactionDocumentType.documentTypeId
+WHERE transactionDocumentType.transactionId = 1 AND documentType.isRequired = 1
+
