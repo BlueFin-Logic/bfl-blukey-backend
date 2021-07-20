@@ -51,15 +51,13 @@ class BaseRepository {
         }
     }
 
-    getByCondition(conditions, fields, include = null) {
+    getByCondition(conditions, fields, include = null, order = null) {
         try {
             return this.table.findAll({
                 attributes: fields,
                 where: conditions,
                 include: include,
-                order: [
-                    ['updatedAt', 'DESC'],
-                ],
+                order: order
             });
         } catch (error) {
             throw CustomError.cannotListEntity(`${this.tableName} Repository`, this.tableName, error);
@@ -105,6 +103,17 @@ class BaseRepository {
             return this.table.count(conditions);
         } catch (error) {
             throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);
+        }
+    }
+
+    deleteItem(conditions, hard = false) {
+        try {
+            return this.table.destroy({
+                where: conditions,
+                force: hard
+            });;
+        } catch (error) {
+            throw CustomError.cannotDeleteEntity(`${this.tableName} Repository`, this.tableName, error);
         }
     }
 }

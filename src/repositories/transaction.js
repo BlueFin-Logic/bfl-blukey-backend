@@ -12,7 +12,6 @@ const defaultFields = [
     'commissionAmount',
     'buyerName',
     'sellerName',
-    'canComplete',
     'listingStartDate',
     'listingEndDate',
     'createdAt',
@@ -54,17 +53,17 @@ class TransactionRepository extends BaseRepository {
             throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);
         }
     }
-    //
-    // getById(id, fields = null, include = null) {
-    //     if (!fields) fields = defaultFields;
-    //     return super.getById(id, fields, include);
-    // }
-    //
+    
+    getById(id, fields = null, include = null) {
+        if (!fields) fields = defaultFields;
+        return super.getById(id, fields, include);
+    }
+    
     // getOne(conditions, fields = null, include = null) {
     //     if (!fields) fields = defaultFields;
     //     return super.getOne(conditions, fields, include);
     // }
-    //
+    
     // getByCondition(conditions, fields = null, include = null) {
     //     if (!fields) fields = defaultFields;
     //     return super.getByCondition(conditions, fields, include);

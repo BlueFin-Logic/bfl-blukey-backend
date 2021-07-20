@@ -89,11 +89,11 @@ module.exports = (sequelize, DataTypes, Model) => {
                 len: [1, 50]
             }
         },
-        canComplete: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+        // canComplete: {
+        //     type: DataTypes.BOOLEAN,
+        //     allowNull: false,
+        //     defaultValue: false
+        // },
         transactionStatusId: {
             type: DataTypes.SMALLINT,
             allowNull: false,

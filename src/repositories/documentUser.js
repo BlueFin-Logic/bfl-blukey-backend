@@ -9,7 +9,10 @@ class DocumentUserRepository extends BaseRepository {
 
     getByCondition(conditions, fields = null, include = null) {
         if (!fields) fields = defaultFields;
-        return super.getByCondition(conditions, fields, include)
+        const order = [
+            ['updatedAt', 'DESC']
+        ]
+        return super.getByCondition(conditions, fields, include, order)
     }
 }
 module.exports = DocumentUserRepository

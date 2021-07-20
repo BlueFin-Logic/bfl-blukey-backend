@@ -19,17 +19,17 @@ module.exports = (sequelize, DataTypes, Model) => {
             }
         },
         folder: {
-            type: DataTypes.STRING(10),
+            type: DataTypes.STRING(15),
             allowNull: false,
             validate: {
-                len: [1, 10]
+                len: [1, 15]
             }
         },
         fileName: {
-            type: DataTypes.STRING(50),
+            type: DataTypes.STRING(225),
             allowNull: false,
             validate: {
-                len: [1, 50]
+                len: [1, 225]
             }
         },
         userId: {

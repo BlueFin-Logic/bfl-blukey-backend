@@ -11,7 +11,7 @@ class DocumentUserService extends BaseService {
 
     async upload(currentUserId, dataFile, originalNameFile, mimeTypeFile) {
         try {
-            const folder = currentUserId;
+            const folder = `user_${currentUserId}`;
             await this.storage.createContainersIfNotExists(this.containerName);
 
             // TODO: Format extension name file.
@@ -27,7 +27,7 @@ class DocumentUserService extends BaseService {
 
             let document = await this.repository.addItem(documentUser);
 
-            let blobSAS = this.storage.generateBlobSAS(this.containerName, 2);
+            const blobSAS = this.storage.generateBlobSAS(this.containerName, 2);
 
             return {
                 url: document.accessUrl(this.storage.account, blobSAS),
@@ -45,9 +45,9 @@ class DocumentUserService extends BaseService {
             let documents = await this.repository.getByCondition({userId: id});
             if (documents.length === 0) throw CustomError.badRequest(`${this.tableName} Handler`, "Documents belong to user is not found!");
 
+            const blobSAS = this.storage.generateBlobSAS(this.containerName, 60);
             // documentsURL
             return documents.map(document => {
-                let blobSAS = this.storage.generateBlobSAS(document.container, 60);
                 return {
                     url: document.accessUrl(this.storage.account, blobSAS),
                     ...document.toJSON()

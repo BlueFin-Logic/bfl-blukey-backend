@@ -24,11 +24,6 @@ class UserRepository extends BaseRepository {
         return super.getOne(conditions, fields, include);
     }
 
-    getByCondition(conditions, fields = null, include = null) {
-        if (!fields) fields = defaultFields;
-        return super.getByCondition(conditions, fields, include);
-    }
-
     addItem(data, fields = null) {
         data.lastLoginDate = time.getLatestTimeUTC();
         return super.addItem(data, fields);

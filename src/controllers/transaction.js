@@ -30,6 +30,26 @@ module.exports.getAll = (appContext) => {
     }
 }
 
+// Get By ID
+module.exports.getById = (appContext) => {
+    return async (req, res, next) => {
+        try {
+            const id = Utilities.parseInt(req.params.id, 1);
+
+            let models = appContext.getDB;
+            let repository = new TransactionRepository(models);
+            let service = new TransactionrService(repository);
+
+            let data = await service.getById(id);
+
+            next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Get ${tableName} by id successful.`, data))
+        } catch (err) {
+            if (err instanceof CustomError.CustomError) next(err);
+            else next(CustomError.cannotGetEntity(`${tableName} Controller`, `${tableName}`, err));
+        }
+    }
+}
+
 // Create
 module.exports.create = (appContext) => {
     return async (req, res, next) => {

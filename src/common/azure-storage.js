@@ -47,9 +47,9 @@ class AzureStorageService {
     }
 
     // Delete file on container => return Promise
-    deleteDataOnBlob(containerName, fileName) {
+    deleteDataOnBlob(containerName, folderAndFileName) {
         try {
-            return this.blobServiceClient.getContainerClient(containerName).getBlockBlobClient(`${fileName}`)
+            return this.blobServiceClient.getContainerClient(containerName).getBlockBlobClient(`${folderAndFileName}`)
                 .deleteIfExists();
         } catch (err) {
             throw err
