@@ -57,3 +57,10 @@ module.exports = {
 // SQL_PASSWORD=Password05
 // SQL_DATABASE=awschatdev
 // SQL_SERVER=awschatpd.database.windows.net
+
+// # azure storage
+// STORAGE_NAME = blukeystoragedev
+// STORAGE_KEY = JFhI+odr/RgkEP2TNiwHzea6sY2K3olwVv61uKdZxaJKv15QpR8PDttXMFqXyzTFF1qoJdBarHUgbazXmDbdpA==
+
+// STORAGE_NAME = awschatclonestorage
+// STORAGE_KEY = LjjoNJOWiw95S86O76JcyNPoEMiOMZvUXaEmC8qpZD3usJmqtGKHyczMmBhOz8blkshZGmhAW0+3NT1hsLkCYA==

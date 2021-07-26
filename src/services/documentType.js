@@ -1,22 +1,25 @@
 const BaseService = require('./base');
 const CustomError = require('../common/error');
-const time = require('../helper/time');
-const { Op } = require('sequelize');
 
 class DocumentTypeService extends BaseService {
-    constructor(service, storage) {
-        super(service);
+    constructor(repository, currentUser, storage) {
+        super(repository, currentUser);
         this.storage = storage;
         this.containerName = "transdocs";
     }
 
-    async getDocumentTypeByTransactionId(id) {
+    async getDocumentTypeByTransactionId(transactionId) {
         try {
+            const transInfo = await this.repository.getTransactionInfo(transactionId);
+            if (!transInfo) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction is not found!");
+
+            if (!this.currentUser.isAdmin && transInfo.userId !== this.currentUser.id) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction is not belongs to you!");
+
             const include = {
                 model: this.repository.models.TransactionDocumentType,
                 as: "transactionDocumentTypes",
                 where: {
-                    transactionId: id
+                    transactionId: transactionId
                 },
                 attributes: ['transactionId', 'documentTypeId', 'container', 'folder', 'fileName', 'updatedAt'],
                 required: false

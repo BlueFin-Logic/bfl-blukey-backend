@@ -1,23 +1,23 @@
 const BaseService = require('./base');
 const CustomError = require('../common/error');
-const time = require('../helper/time');
+const Time = require('../helper/time');
 
 class TransactionDocumentTypeService extends BaseService {
-    constructor(service, storage) {
-        super(service);
+    constructor(repository, currentUser, storage) {
+        super(repository, currentUser);
         this.storage = storage;
         this.containerName = "transdocs";
     }
 
-    async upload(id, dataFile, originalNameFile, mimeTypeFile) {
+    async upload(transdocsId, dataFile, originalNameFile, mimeTypeFile) {
         try {
-            const { transactionId, documentTypeId } = id;
+            const { transactionId, documentTypeId } = transdocsId;
             const [transaction, transdocsExist] = await Promise.all([
                 this.repository.getTransactionInfo(transactionId),
                 this.repository.getOne({ transactionId: transactionId, documentTypeId: documentTypeId }, ['documentTypeId'])
             ]);
 
-            // if (transaction.userId !== currentUserId) throw CustomError.badRequest(`${this.tableName} Handler`, "Upload load document is fail. Transaction is not belong to you!");
+            if (transaction.userId !== this.currentUser.id) throw CustomError.badRequest(`${this.tableName} Handler`, "Upload load document is fail. Transaction is not belong to you!");
             if (transaction.transactionStatusId !== 2) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction Status is not In Process. Please change status to In Process before upload document!");
             if (transdocsExist) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction Document Type already exist!");
 
@@ -25,7 +25,7 @@ class TransactionDocumentTypeService extends BaseService {
             await this.storage.createContainersIfNotExists(this.containerName);
 
             // TODO: Format extension name file.
-            const fileName = `${documentTypeId}_${time.getCurrentUnixTimestamp()}_${originalNameFile}`;
+            const fileName = `${documentTypeId}_${Time.getCurrentUnixTimestamp()}_${originalNameFile}`;
             await this.storage.uploadDataOnBlob(this.containerName, dataFile, fileName, folder, mimeTypeFile);
 
             const data = {
@@ -68,27 +68,33 @@ class TransactionDocumentTypeService extends BaseService {
         }
     }
 
-    async delete(data) {
-        const { transactionId, documentTypeId } = data;
-        const [transaction, transdocsExist] = await Promise.all([
-            this.repository.getTransactionInfo(transactionId),
-            this.repository.getOne(
+    async delete(transdocsId) {
+        const { transactionId, documentTypeId } = transdocsId;
+        
+        const transdocsExist = await this.repository.getOne(
+            {
+                transactionId: transactionId,
+                documentTypeId: documentTypeId
+            },
+            ['transactionId', 'documentTypeId', 'container', 'folder', 'fileName'],
+            [
                 {
-                    transactionId: transactionId,
-                    documentTypeId: documentTypeId
+                    model: this.repository.models.Transaction,
+                    as: "transaction",
+                    attributes: ['id', 'userId', 'transactionStatusId']
                 },
-                ['transactionId', 'documentTypeId', 'container', 'folder', 'fileName'],
                 {
                     model: this.repository.models.DocumentType,
                     as: "documentType",
                     attributes: ["id", "name", "isRequired"]
                 }
-            )
-        ]);
+            ]
+        )
 
-        // if (transaction.userId !== currentUserId) throw CustomError.badRequest(`${this.tableName} Handler`, "Upload load document is fail. Transaction is not belong to you!");
-        if (transaction.transactionStatusId !== 2) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction Status is not In Process. Please change status to In Process before delete document upload!");
         if (!transdocsExist) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction Document Type is not exist!");
+        if (transdocsExist.transaction.userId !== this.currentUser.id) throw CustomError.badRequest(`${this.tableName} Handler`, "Delete file uploaded document is fail. Transaction is not belong to you!");
+        if (transdocsExist.transaction.transactionStatusId !== 2) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction Status is not In Process. Please change status to In Process before delete document upload!");
+
 
         await this.repository.deleteItem(
             {

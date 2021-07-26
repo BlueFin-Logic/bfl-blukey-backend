@@ -1,3 +1,5 @@
+// const Time = require('../../helper/time');
+
 module.exports = (sequelize, DataTypes, Model) => {
     class Transaction extends Model {
     }
@@ -89,11 +91,6 @@ module.exports = (sequelize, DataTypes, Model) => {
                 len: [1, 50]
             }
         },
-        // canComplete: {
-        //     type: DataTypes.BOOLEAN,
-        //     allowNull: false,
-        //     defaultValue: false
-        // },
         transactionStatusId: {
             type: DataTypes.SMALLINT,
             allowNull: false,
@@ -103,12 +100,18 @@ module.exports = (sequelize, DataTypes, Model) => {
             // }
         },
         listingStartDate: {
-            type: DataTypes.DATE,
-            allowNull: false
+            type: DataTypes.DATEONLY,
+            allowNull: false,
+            // get() {
+            //     return Time.formatTimeToStringDate(this.getDataValue('listingStartDate'));
+            // }
         },
         listingEndDate: {
-            type: DataTypes.DATE,
-            allowNull: false
+            type: DataTypes.DATEONLY,
+            allowNull: false,
+            // get() {
+            //     return Time.formatTimeToStringDate(this.getDataValue('listingEndDate'));
+            // }
         },
         createdAt: {
             type: DataTypes.DATE,

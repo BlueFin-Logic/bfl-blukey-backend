@@ -1,9 +1,8 @@
-const CustomError = require('../common/error');
-
 class BaseService {
-    constructor(repository) {
+    constructor(repository, currentUser) {
         this.repository = repository;
         this.tableName = this.repository.tableName;
+        this.currentUser = currentUser;
     }
 }
 

@@ -7,6 +7,7 @@ const middlewareAuthorize = require("../middleware/authorize");
 const middlewareUpload = require("../middleware/upload");
 const documentUser = require("./documentUser");
 const transaction = require("./transaction");
+const transactionComment = require("./transactionComment");
 const documentType = require("./documentType");
 const transactionDocumentTypeController = require("../controllers/transactionDocumentType");
 
@@ -23,6 +24,8 @@ module.exports = function setupRouter(appContext) {
     router.use("/api/v1/documentUsers", middlewareAuthorize.authorize(appContext), documentUser(appContext));
     // transaction
     router.use("/api/v1/transactions", middlewareAuthorize.authorize(appContext), transaction(appContext));
+    // transactionComment
+    router.use("/api/v1/transactionComments", middlewareAuthorize.authorize(appContext), transactionComment(appContext));
     // documentType
     router.use("/api/v1/documentTypes", middlewareAuthorize.authorize(appContext), documentType(appContext));
     return router;

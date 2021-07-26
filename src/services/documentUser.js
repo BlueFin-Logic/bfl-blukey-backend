@@ -1,21 +1,22 @@
 const BaseService = require('../services/base');
 const CustomError = require('../common/error');
-const time = require('../helper/time');
+const Time = require('../helper/time');
 
 class DocumentUserService extends BaseService {
-    constructor(service, storage) {
-        super(service);
+    constructor(repository, currentUser, storage) {
+        super(repository, currentUser);
         this.storage = storage;
         this.containerName = "userinfo";
     }
 
-    async upload(currentUserId, dataFile, originalNameFile, mimeTypeFile) {
+    async upload(dataFile, originalNameFile, mimeTypeFile) {
         try {
+            const currentUserId = this.currentUser.id;
             const folder = `user_${currentUserId}`;
             await this.storage.createContainersIfNotExists(this.containerName);
 
             // TODO: Format extension name file.
-            const fileName = `${currentUserId}_${time.getCurrentUnixTimestamp()}_${originalNameFile}`;
+            const fileName = `${currentUserId}_${Time.getCurrentUnixTimestamp()}_${originalNameFile}`;
             await this.storage.uploadDataOnBlob(this.containerName, dataFile, fileName, folder, mimeTypeFile);
 
             let documentUser = {
@@ -35,15 +36,18 @@ class DocumentUserService extends BaseService {
             };
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotCreateEntity(`${this.tableName} Handler`, this.table, err);
+            throw CustomError.cannotCreateEntity(`${this.tableName} Handler`, this.tableName, err);
         }
     }
 
-    async getDocumentInfoByUserId(id) {
+    async getDocumentInfoByUserId(userId) {
         try {
+            if (!this.currentUser.isAdmin) {
+                if (this.currentUser.id !== userId) throw CustomError.forbidden(`${this.tableName} Handler`);
+            }
             // Get documents belong to user just have inserted.
-            let documents = await this.repository.getByCondition({userId: id});
-            if (documents.length === 0) throw CustomError.badRequest(`${this.tableName} Handler`, "Documents belong to user is not found!");
+            let documents = await this.repository.getByCondition({userId: userId});
+            if (documents.length === 0) return documents;
 
             const blobSAS = this.storage.generateBlobSAS(this.containerName, 60);
             // documentsURL

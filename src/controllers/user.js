@@ -1,5 +1,5 @@
-const UserRepository = require('../repositories/user')
-const UserService = require('../services/user')
+const Repository = require('../repositories/user')
+const Service = require('../services/user')
 const CustomResponse = require('../common/response')
 const CustomError = require('../common/error')
 const Utilities = require('../helper/utilities')
@@ -10,13 +10,14 @@ module.exports.getAll = (appContext) => {
     return async (req, res, next) => {
         try {
             const page = Utilities.parseInt(req.query.page, 1);
-            const limit = Utilities.parseInt(req.query.limit, 100);
+            const limit = Utilities.parseInt(req.query.limit, 1);
 
-            let models = appContext.getDB;
-            let repository = new UserRepository(models);
-            let service = new UserService(repository);
+            const currentUser = req.currentUser;
+            const models = appContext.getDB;
+            const repository = new Repository(models);
+            const service = new Service(repository, currentUser);
 
-            let {total, data} = await service.getAll(page, limit);
+            const {total, data} = await service.getAll(page, limit);
 
             let paging = {
                 page: page,
@@ -34,13 +35,14 @@ module.exports.getAll = (appContext) => {
 module.exports.getById = (appContext) => {
     return async (req, res, next) => {
         try {
-            const id = Utilities.parseInt(req.params.id, 1);
+            const userId = Utilities.parseInt(req.params.id, 0);
 
-            let models = appContext.getDB;
-            let repository = new UserRepository(models);
-            let service = new UserService(repository);
+            const currentUser = req.currentUser;
+            const models = appContext.getDB;
+            const repository = new Repository(models);
+            const service = new Service(repository, currentUser);
 
-            let data = await service.getById(id);
+            const data = await service.getById(userId);
 
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Get ${tableName} by id successful.`, data))
         } catch (err) {
@@ -55,11 +57,12 @@ module.exports.create = (appContext) => {
         try {
             const body = req.body;
 
-            let models = appContext.getDB;
-            let repository = new UserRepository(models);
-            let service = new UserService(repository);
+            const currentUser = req.currentUser;
+            const models = appContext.getDB;
+            const repository = new Repository(models);
+            const service = new Service(repository, currentUser);
 
-            let data = await service.create(body);
+            const data = await service.create(body);
 
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Created ${tableName} successful.`, data))
         } catch (err) {
@@ -73,13 +76,14 @@ module.exports.update = (appContext) => {
     return async (req, res, next) => {
         try {
             const body = req.body;
-            const id = Utilities.parseInt(req.params.id, 1);
+            const userId = Utilities.parseInt(req.params.id, 0);
             
-            let models = appContext.getDB;
-            let repository = new UserRepository(models);
-            let service = new UserService(repository);
+            const currentUser = req.currentUser;
+            const models = appContext.getDB;
+            const repository = new Repository(models);
+            const service = new Service(repository, currentUser);
 
-            let data = await service.update(id, body);
+            const data = await service.update(userId, body);
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Updated ${tableName} successful.`, data))
         } catch (err) {
             if (err instanceof CustomError.CustomError) next(err);

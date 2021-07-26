@@ -1,5 +1,5 @@
-const UserRepository = require('../repositories/user')
-const AuthenService = require('../services/authen')
+const Repository = require('../repositories/user')
+const Service = require('../services/authen')
 const CustomResponse = require('../common/response')
 const CustomError = require('../common/error')
 const tableName = "Authentication";
@@ -11,11 +11,11 @@ module.exports.login = (appContext) => {
 
             let token = appContext.getTokenJWT;
 
-            let models = appContext.getDB;
-            let repository = new UserRepository(models);
-            let service = new AuthenService(repository);
+            const models = appContext.getDB;
+            const repository = new Repository(models);
+            const service = new Service(repository);
 
-            let data = await service.login(body, token);
+            const data = await service.login(body, token);
 
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Login successful!`, data));
         } catch (err) {

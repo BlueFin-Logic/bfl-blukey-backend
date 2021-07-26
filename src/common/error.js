@@ -35,12 +35,12 @@ module.exports.unauthorized = (namespace, message, rootError = null) => {
     return new CustomError(namespace, 401, message, rootError);
 }
 
-module.exports.forbidden = (namespace, message, rootError = null) => {
-    return new CustomError(namespace, 403, message, rootError);
-}
-
 module.exports.internal = (namespace, message, rootError = null) => {
     return new CustomError(namespace, 500, message, rootError);
+}
+
+module.exports.forbidden = (namespace, rootError = null) => {
+    return new CustomError(namespace, 403, "User do not have permission access this functional.", rootError);
 }
 
 module.exports.database = (namespace, rootError = null) => {

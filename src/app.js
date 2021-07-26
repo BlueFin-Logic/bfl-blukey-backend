@@ -44,7 +44,7 @@ module.exports = async () => {
         app.use(cors());
         app.use(helmet());
         // check connection
-        app.get("/test", (req, res) => {
+        app.get("/ping", (req, res) => {
             res.send("pong");
         });
         // body parse

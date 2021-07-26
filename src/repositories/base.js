@@ -51,13 +51,14 @@ class BaseRepository {
         }
     }
 
-    getByCondition(conditions, fields, include = null, order = null) {
+    getByCondition(conditions, fields, include = null, order = null, paranoid = true) {
         try {
             return this.table.findAll({
                 attributes: fields,
                 where: conditions,
                 include: include,
-                order: order
+                order: order,
+                paranoid: paranoid
             });
         } catch (error) {
             throw CustomError.cannotListEntity(`${this.tableName} Repository`, this.tableName, error);
@@ -90,8 +91,7 @@ class BaseRepository {
             return this.table.update(data, {
                 where: conditions,
                 fields: fields,
-                validate: true,
-                // returning: true
+                validate: true
             });
         } catch (error) {
             throw CustomError.cannotUpdateEntity(`${this.tableName} Repository`, this.tableName, error);

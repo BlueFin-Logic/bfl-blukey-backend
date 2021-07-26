@@ -51,8 +51,7 @@ class TransactionDocumentTypeRepository extends BaseRepository {
             return this.models.Transaction.findOne({
                 attributes: ['id', 'userId', 'transactionStatusId'],
                 where: {
-                    id: transactionId,
-                    // transactionStatusId: 2
+                    id: transactionId
                 }
             });
         } catch (error) {

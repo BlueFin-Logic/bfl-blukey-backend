@@ -1,17 +1,17 @@
 const BaseRepository = require('./base');
 const CustomError = require('../common/error');
 const defaultFields = ['id', 'firstName', 'lastName', 'email', 'address', 'userName', 'lastLoginDate', 'updatedAt'];
-const time = require('../helper/time');
+const Time = require('../helper/time');
 
 class UserRepository extends BaseRepository {
     constructor(models) {
         super(models.User, models);
     }
 
-    getAll(page, limit, conditions = null) {
+    getAll(page, limit, conditions = null, include = null) {
         let fields = defaultFields;
         fields.push('isAdmin');
-        return super.getAll(page, limit, fields, conditions);
+        return super.getAll(page, limit, fields, conditions, include);
     }
 
     getById(id, fields = null, include = null) {
@@ -24,13 +24,15 @@ class UserRepository extends BaseRepository {
         return super.getOne(conditions, fields, include);
     }
 
-    addItem(data, fields = null) {
-        data.lastLoginDate = time.getLatestTimeUTC();
+    addItem(data) {
+        data.lastLoginDate = Time.getLatestTimeUTC();
+        const fields = ['firstName', 'lastName', 'fullName', 'email', 'address', 'userName', 'password', 'isAdmin', 'lastLoginDate'];
         return super.addItem(data, fields);
     }
 
-    updateItem(userName, data, conditions, fields = null) {
+    updateItem(userName, data, conditions) {
         data.userName = userName; // for hash pass
+        const fields = ['firstName', 'lastName', 'fullName', 'email', 'address', 'userName', 'password' ,'lastLoginDate', 'isAdmin'];
         return super.updateItem(data, conditions, fields);
     }
 }

@@ -28,6 +28,12 @@ module.exports = (sequelize, DataTypes, Model) => {
         comment: {
             type: DataTypes.TEXT,
             allowNull: false,
+            min: [1]
+        },
+        isEdited: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         },
         createdAt: {
             type: DataTypes.DATE,

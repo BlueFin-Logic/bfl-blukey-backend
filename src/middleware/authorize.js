@@ -8,7 +8,7 @@ module.exports.authorize = (appContext) => {
         try {
             const authHeader = req.headers['authorization']
             const token = authHeader && authHeader.split(' ')[1]
-            if (!token) throw CustomError.unauthorized(`Authorized Middleware`, "Token is not found!" )
+            if (!token) throw CustomError.unauthorized(`Authorized Middleware`, "Token is not found!" );
 
             const tokenService = appContext.getTokenJWT;
             const decoded = tokenService.verify(token);
@@ -17,10 +17,13 @@ module.exports.authorize = (appContext) => {
             let repository = new UserRepository(models);
             let service = new AuthenService(repository);
 
-            await service.authorized(decoded.id);
+            let user = await service.authorized(decoded.id);
+            
+            req.currentUser = {
+                id: user.id,
+                isAdmin : user.isAdmin
+            };
 
-            req.currentUserId = decoded.id;
-            req.currentUserIsAdmin = decoded.isAdmin;
             next();
         } catch (err) {
             if (err instanceof CustomError.CustomError) next(err);

@@ -11,19 +11,17 @@ const tableName = "Upload";
 module.exports.uploadDocumentUser = (appContext) => {
     return async (req, res, next) => {
         try {
-            const currentUserId = req.currentUserId;
-
             let dataFile = Buffer.from(req.file.buffer);
             let originalNameFile = req.file.originalname;
             let mimeTypeFile = req.file.mimetype;
 
-            let storage = appContext.getStorage;
+            const currentUser = req.currentUser;
+            const storage = appContext.getStorage;
+            const models = appContext.getDB;
+            const repository = new DocumentUserRepository(models);
+            const service = new DocumentUserService(repository, currentUser, storage);
 
-            let models = appContext.getDB;
-            let repository = new DocumentUserRepository(models);
-            let service = new DocumentUserService(repository, storage);
-
-            let data = await service.upload(currentUserId, dataFile, originalNameFile, mimeTypeFile);
+            const data = await service.upload(dataFile, originalNameFile, mimeTypeFile);
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Upload successful!`, data));
         } catch (err) {
             if (err instanceof CustomError.CustomError) next(err);
@@ -36,22 +34,22 @@ module.exports.uploadDocumentUser = (appContext) => {
 module.exports.uploadTransactionDocumentType = (appContext) => {
     return async (req, res, next) => {
         try {
-            const id = {
-                transactionId: Utilities.parseInt(req.query.transactionId, 1),
-                documentTypeId: Utilities.parseInt(req.query.documentTypeId, 1)
+            const transdocsId = {
+                transactionId: Utilities.parseInt(req.query.transactionId, 0),
+                documentTypeId: Utilities.parseInt(req.query.documentTypeId, 0)
             }
 
             let dataFile = Buffer.from(req.file.buffer);
             let originalNameFile = req.file.originalname;
             let mimeTypeFile = req.file.mimetype;
 
-            let storage = appContext.getStorage;
+            const currentUser = req.currentUser;
+            const storage = appContext.getStorage;
+            const models = appContext.getDB;
+            const repository = new TransactionDocumentTypeRepository(models);
+            const service = new TransactionDocumentTypeService(repository, currentUser, storage);
 
-            let models = appContext.getDB;
-            let repository = new TransactionDocumentTypeRepository(models);
-            let service = new TransactionDocumentTypeService(repository, storage);
-
-            let data = await service.upload(id, dataFile, originalNameFile, mimeTypeFile);
+            const data = await service.upload(transdocsId, dataFile, originalNameFile, mimeTypeFile);
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Upload successful!`, data));
         } catch (err) {
             if (err instanceof CustomError.CustomError) next(err);

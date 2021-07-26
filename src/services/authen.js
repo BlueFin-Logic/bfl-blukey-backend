@@ -1,11 +1,12 @@
-const BaseService = require('../services/base');
+// const BaseService = require('../services/base');
 const CustomError = require('../common/error');
 const hash = require('../helper/hash');
-const time = require('../helper/time');
+const Time = require('../helper/time');
 
-class AuthenService extends BaseService {
-    constructor(service) {
-        super(service)
+class AuthenService {
+    constructor(repository) {
+        this.repository = repository;
+        this.tableName = this.repository.tableName;
     }
 
     async login(item, token) {
@@ -13,7 +14,7 @@ class AuthenService extends BaseService {
             let itemUserName = item.userName;
             let itemPassword = item.password;
 
-            let fields = ['id', 'firstName', 'lastName', 'email', 'address', 'userName', 'password', 'isAdmin', 'lastLoginDate'];
+            let fields = ['id', 'firstName', 'lastName', 'fullName', 'email', 'address', 'userName', 'password', 'isAdmin', 'lastLoginDate'];
             let userExist = await this.repository.getOne({userName: itemUserName}, fields);
 
             // Check user is exist.
@@ -24,7 +25,7 @@ class AuthenService extends BaseService {
 
             // Update last login date
             let user = {
-                lastLoginDate: time.getLatestTimeUTC()
+                lastLoginDate: Time.getLatestTimeUTC()
             }
             await this.repository.updateItem(userExist.userName, user, {id: userExist.id});
 
@@ -33,13 +34,13 @@ class AuthenService extends BaseService {
                 isAdmin: userExist.isAdmin
             }
 
-            let {password, ...rest} = userExist.toJSON()
+            let {password, lastLoginDate, ...rest} = userExist.toJSON()
 
             return {
                 accessToken: token.sign(data, userExist.email),
                 refreshToken: token.sign(data, userExist.email, "30 days"),
                 user: {
-                    fullName: userExist.fullName,
+                    lastLoginDate: user.lastLoginDate,
                     ...rest
                 }
             }
@@ -51,13 +52,13 @@ class AuthenService extends BaseService {
 
     async authorized(id) {
         try {
-            let userExist = await this.repository.getById(id, ['id']);
-            // Check user is exist.
+            let userExist = await this.repository.getById(id, ['id', 'isAdmin']);
+            // Check user is not exist.
             if (!userExist) throw CustomError.badRequest(`Authentication Handler`, "User is not found!");
             return userExist;
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotGetEntity(`Authentication Handler`, this.table, err);
+            throw CustomError.cannotGetEntity(`Authentication Handler`, this.tableName, err);
         }
     }
 }

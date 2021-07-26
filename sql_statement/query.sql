@@ -324,8 +324,27 @@ FROM [User]
 SELECT * 
 FROM [TransactionDocumentType]
 
-SELECT COUNT(transactionId)
-FROM TransactionDocumentType AS transactionDocumentType
-INNER JOIN DocumentType AS documentType ON documentType.id = transactionDocumentType.documentTypeId
-WHERE transactionDocumentType.transactionId = 1 AND documentType.isRequired = 1
+SELECT * 
+FROM [TransactionComment]
 
+DELETE FROM TransactionDocumentType 
+WHERE transactionId = 1 AND documentTypeId = 1
+
+DELETE FROM TransactionDocumentType 
+WHERE transactionId = 1 AND documentTypeId = 2
+
+-- Update rows in table '[TableName]' in schema '[dbo]'
+UPDATE [dbo].[Transaction]
+SET
+	[transactionStatusId] = 1
+WHERE id = 3
+GO
+
+-- Update rows in table '[TableName]' in schema '[dbo]'
+UPDATE [dbo].[Transaction]
+SET
+	[userId] = 4
+WHERE id = 1
+GO
+
+[id][transactionId][userId][comment][isEdited][createdAt][updatedAt][deletedAt][isAdmin][documentTypeId][transactionStatusId]

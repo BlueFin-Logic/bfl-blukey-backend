@@ -11,23 +11,28 @@ module.exports = (sequelize, DataTypes, Model) => {
             primaryKey: true
         },
         firstName: {
-            type: DataTypes.STRING(15),
+            type: DataTypes.STRING(20),
             allowNull: false,
             validate: {
-                len: [1, 15]
+                len: [1, 20]
             }
         },
         lastName: {
-            type: DataTypes.STRING(15),
+            type: DataTypes.STRING(80),
             allowNull: false,
             validate: {
-                len: [1, 15]
+                len: [1, 80]
             }
         },
         fullName: {
-            type: DataTypes.VIRTUAL,
-            get() {
-                return `${this.firstName} ${this.lastName}`;
+            // type: DataTypes.VIRTUAL,
+            // get() {
+            //     return `${this.firstName} ${this.lastName}`;
+            // }
+            type: DataTypes.STRING(120),
+            allowNull: false,
+            validate: {
+                len: [1, 120]
             }
         },
         email: {
@@ -84,6 +89,11 @@ module.exports = (sequelize, DataTypes, Model) => {
             defaultValue: DataTypes.NOW
         },
     }, {
+        hooks: {
+            beforeValidate: (user, options) => {
+                user.fullName = `${user.firstName} ${user.lastName}`;
+            }
+        },
         sequelize,
         schema: 'dbo',
         timestamps: true,

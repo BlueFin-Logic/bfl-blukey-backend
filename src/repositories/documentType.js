@@ -11,5 +11,19 @@ class DocumentTypeRepository extends BaseRepository {
         if (!fields) fields = defaultFields;
         return super.getByCondition(conditions, fields, include)
     }
+
+    getTransactionInfo(transactionId) {
+        try {
+            return this.models.Transaction.findOne({
+                attributes: ['id', 'userId', 'transactionStatusId'],
+                where: {
+                    id: transactionId
+                }
+            });
+        } catch (error) {
+            throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);
+        }
+
+    }
 }
 module.exports = DocumentTypeRepository

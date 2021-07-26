@@ -1,20 +1,25 @@
-const TransDocsRepository = require('../repositories/transactionDocumentType')
-const TransDocsService = require('../services/transactionDocumentType')
+const Repository = require('../repositories/transactionDocumentType')
+const Service = require('../services/transactionDocumentType')
 const CustomResponse = require('../common/response')
 const CustomError = require('../common/error')
+const Utilities = require('../helper/utilities')
 const tableName = "TransactionDocumentType";
 
 module.exports.delete = (appContext) => {
     return async (req, res, next) => {
         try {
-            const body = req.body;
+            const transdocsId = {
+                transactionId: Utilities.parseInt(req.body.transactionId, 0),
+                documentTypeId: Utilities.parseInt(req.body.documentTypeId, 0)
+            };
 
-            let storage = appContext.getStorage;
-            let models = appContext.getDB;
-            let repository = new TransDocsRepository(models);
-            let service = new TransDocsService(repository, storage);
+            const currentUser = req.currentUser;
+            const storage = appContext.getStorage;
+            const models = appContext.getDB;
+            const repository = new Repository(models);
+            const service = new Service(repository, currentUser, storage);
 
-            let data = await service.delete(body);
+            const data = await service.delete(transdocsId);
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Deleted ${tableName} successful.`, data))
         } catch (err) {
             if (err instanceof CustomError.CustomError) next(err);

@@ -1,50 +1,22 @@
-const Repository = require('../repositories/transaction')
-const Service = require('../services/transaction')
+const Repository = require('../repositories/transactionComment')
+const Service = require('../services/transactionComment')
 const CustomResponse = require('../common/response')
 const CustomError = require('../common/error')
 const Utilities = require('../helper/utilities')
-const tableName = "Transaction";
+const tableName = "TransactionComment";
 
-// Get All
-module.exports.getAll = (appContext) => {
+// Get By Condition
+module.exports.getByCondition = (appContext) => {
     return async (req, res, next) => {
         try {
-            const page = Utilities.parseInt(req.query.page, 1);
-            const limit = Utilities.parseInt(req.query.limit, 10);
-            const query = req.query;
-
-            // TODO: Show trans belong to User, if admin show all
-            const currentUser = req.currentUser;
-            const models = appContext.getDB;
-            const repository = new Repository(models);
-            const service = new Service(repository, currentUser);
-
-            const {total, data} = await service.getAll(page, limit, query);
-
-            let paging = {
-                page: page,
-                total: total
-            }
-            next(CustomResponse.newSuccessResponse(`${tableName} Controller`, `Get list ${tableName} successful.`, data, paging))
-        } catch (err) {
-            if (err instanceof CustomError.CustomError) next(err);
-            else next(CustomError.cannotListEntity(`${tableName} Controller`, `${tableName}`, err));
-        }
-    }
-}
-
-// Get By ID
-module.exports.getById = (appContext) => {
-    return async (req, res, next) => {
-        try {
-            const transId = Utilities.parseInt(req.params.id, 0);
+            const transactionId = Utilities.parseInt(req.query.transactionId, 0);
 
             const currentUser = req.currentUser;
             const models = appContext.getDB;
             const repository = new Repository(models);
             const service = new Service(repository, currentUser);
 
-            const data = await service.getById(transId);
+            const data = await service.getByTransactionId(transactionId);
 
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Get ${tableName} by id successful.`, data))
         } catch (err) {
@@ -53,19 +25,18 @@ module.exports.getById = (appContext) => {
         }
     }
 }
-
 // Create
 module.exports.create = (appContext) => {
     return async (req, res, next) => {
         try {
-            const transaction = req.body;
+            const body = req.body;
 
             const currentUser = req.currentUser;
             const models = appContext.getDB;
             const repository = new Repository(models);
             const service = new Service(repository, currentUser);
 
-            const data = await service.create(transaction);
+            const data = await service.create(body);
 
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Created ${tableName} successful.`, data))
         } catch (err) {
@@ -74,20 +45,19 @@ module.exports.create = (appContext) => {
         }
     }
 }
-
 // Update
 module.exports.update = (appContext) => {
     return async (req, res, next) => {
         try {
-            const transId = Utilities.parseInt(req.params.id, 0);
             const body = req.body;
-
+            const transCommentId = Utilities.parseInt(req.params.id, 0);
+            
             const currentUser = req.currentUser;
             const models = appContext.getDB;
             const repository = new Repository(models);
             const service = new Service(repository, currentUser);
 
-            const data = await service.update(transId, body);
+            const data = await service.update(transCommentId, body);
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Updated ${tableName} successful.`, data))
         } catch (err) {
             if (err instanceof CustomError.CustomError) next(err);
@@ -96,24 +66,22 @@ module.exports.update = (appContext) => {
     }
 }
 
-// Status
-module.exports.status = (appContext) => {
+// Delete
+module.exports.delete = (appContext) => {
     return async (req, res, next) => {
         try {
-            const transId = Utilities.parseInt(req.params.id, 0);
-            const status = Utilities.parseInt(req.body.status, 0);
+            const transCommentId = Utilities.parseInt(req.params.id, 0);
 
             const currentUser = req.currentUser;
             const models = appContext.getDB;
             const repository = new Repository(models);
             const service = new Service(repository, currentUser);
 
-            const data = await service.status(transId, status);
-
-            next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Updated status for ${tableName} successful.`, data))
+            const data = await service.delete(transCommentId);
+            next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Deleted ${tableName} successful.`, data))
         } catch (err) {
             if (err instanceof CustomError.CustomError) next(err);
-            else next(CustomError.cannotUpdateEntity(`${tableName} Controller`, `${tableName}`, err));
+            else next(CustomError.cannotDeleteEntity(`${tableName} Controller`, `${tableName}`, err));
         }
     }
 }
