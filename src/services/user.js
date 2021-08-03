@@ -8,10 +8,16 @@ class UserService extends BaseService {
         super(repository, currentUser);
     }
 
-    async getAll(page, limit) {
+    async getAll(page, limit, query) {
         try {
-            if (!this.currentUser.isAdmin) throw CustomError.forbidden(`${tableName} Handler`);
-            const {count, rows} = await this.repository.getAll(page, limit);
+            if (!this.currentUser.isAdmin) throw CustomError.forbidden(`${this.tableName} Handler`);
+            const conditions = {
+                fullName: {
+                    [Op.substring]: `${query.fullName}`
+                }
+            };
+            if (query.fields) query.fields = query.fields.replace(/\s+/g, '').split(',');
+            const {count, rows} = await this.repository.getAll(page, limit, query.fields,conditions);
             return {
                 total: count,
                 data: rows
@@ -37,7 +43,7 @@ class UserService extends BaseService {
         }
     }
 
-    async create(data) {
+    async create(data, emailService) {
         try {
             if (!this.currentUser.isAdmin) throw CustomError.forbidden(`${this.tableName} Handler`);
             let where = {
@@ -55,11 +61,17 @@ class UserService extends BaseService {
                 ]
             }
 
-            let userExist = await this.repository.getOne(where, ['id']);
+            const userExist = await this.repository.getOne(where, ['id']);
 
             if (userExist) throw CustomError.badRequest(`${this.tableName} Handler`, "Email or username already exist!");
 
-            let result = await this.repository.addItem(data);
+            const result = await this.repository.addItem(data);
+
+            // Send email
+            const subject = emailService.newUserSubject();
+            const content = emailService.newUserContent(data);
+            await emailService.sendMail(data.email, subject, content);
+
             return {
                 id: result.id
             };
@@ -96,6 +108,29 @@ class UserService extends BaseService {
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
             throw CustomError.cannotUpdateEntity(`${this.tableName} Handler`, this.tableName, err);
+        }
+    }
+
+    async delete(userId) {
+        try {
+            if (!this.currentUser.isAdmin) {
+                throw CustomError.forbidden(`${this.tableName} Handler`);
+            }
+
+            let user = await this.repository.getById(userId);
+            // Check user is exist.
+            if (!user) throw CustomError.badRequest(`${this.tableName} Handler`, "User is not found!");
+
+            const conditions = {
+                id: userId
+            };
+            await this.repository.deleteItem(conditions);
+            return {
+                id: userId
+            }
+        } catch (err) {
+            if (err instanceof CustomError.CustomError) throw err;
+            throw CustomError.cannotDeleteEntity(`${this.tableName} Handler`, this.tableName, err);
         }
     }
 }

@@ -19,7 +19,9 @@ const EXPIRES_IN = process.env.EXPIRES_IN || "1h";
 // STORAGE
 const STORAGE_NAME = process.env.STORAGE_NAME;
 const STORAGE_KEY = process.env.STORAGE_KEY;
-
+// EMAIL
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
 
 module.exports = {
     port: PORT,
@@ -40,6 +42,10 @@ module.exports = {
     azureStorage: {
         storageName: STORAGE_NAME,
         storageKey: STORAGE_KEY
+    },
+    email: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASS
     },
 };
 

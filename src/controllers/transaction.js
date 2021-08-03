@@ -108,7 +108,8 @@ module.exports.status = (appContext) => {
             const repository = new Repository(models);
             const service = new Service(repository, currentUser);
 
-            const data = await service.status(transId, status);
+            const emailService = appContext.getEmail;
+            const data = await service.status(transId, status, emailService);
 
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Updated status for ${tableName} successful.`, data))
         } catch (err) {

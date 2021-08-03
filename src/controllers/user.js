@@ -11,13 +11,14 @@ module.exports.getAll = (appContext) => {
         try {
             const page = Utilities.parseInt(req.query.page, 1);
             const limit = Utilities.parseInt(req.query.limit, 1);
+            const query = req.query;
 
             const currentUser = req.currentUser;
             const models = appContext.getDB;
             const repository = new Repository(models);
             const service = new Service(repository, currentUser);
 
-            const {total, data} = await service.getAll(page, limit);
+            const {total, data} = await service.getAll(page, limit, query);
 
             let paging = {
                 page: page,
@@ -62,7 +63,8 @@ module.exports.create = (appContext) => {
             const repository = new Repository(models);
             const service = new Service(repository, currentUser);
 
-            const data = await service.create(body);
+            const emailService = appContext.getEmail;
+            const data = await service.create(body, emailService);
 
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Created ${tableName} successful.`, data))
         } catch (err) {
@@ -88,6 +90,26 @@ module.exports.update = (appContext) => {
         } catch (err) {
             if (err instanceof CustomError.CustomError) next(err);
             else next(CustomError.cannotUpdateEntity(`${tableName} Controller`, `${tableName}`, err));
+        }
+    }
+}
+
+// Delete
+module.exports.delete = (appContext) => {
+    return async (req, res, next) => {
+        try {
+            const userId = Utilities.parseInt(req.params.id, 0);
+
+            const currentUser = req.currentUser;
+            const models = appContext.getDB;
+            const repository = new Repository(models);
+            const service = new Service(repository, currentUser);
+
+            const data = await service.delete(userId);
+            next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Deleted ${tableName} successful.`, data))
+        } catch (err) {
+            if (err instanceof CustomError.CustomError) next(err);
+            else next(CustomError.cannotDeleteEntity(`${tableName} Controller`, `${tableName}`, err));
         }
     }
 }

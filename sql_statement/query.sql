@@ -327,8 +327,8 @@ FROM [TransactionDocumentType]
 SELECT * 
 FROM [TransactionComment]
 
-DELETE FROM TransactionDocumentType 
-WHERE transactionId = 1 AND documentTypeId = 1
+DELETE FROM [User] 
+WHERE id = 9
 
 DELETE FROM TransactionDocumentType 
 WHERE transactionId = 1 AND documentTypeId = 2

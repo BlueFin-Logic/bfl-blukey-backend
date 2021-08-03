@@ -11,28 +11,11 @@ class TransactionService extends BaseService {
 
     async getAll(page, limit, query) {
         try {
-            let whereAgentName = null;
             let whereTransaction = {};
 
             if (this.currentUser.isAdmin) {
-                if (query.agentName) {
-                    whereAgentName = {
-                        // [Op.or]: [
-                        //     {
-                        //         firstName: {
-                        //             [Op.substring]: `${query.agentName}`
-                        //         }
-                        //     },
-                        //     {
-                        //         lastName: {
-                        //             [Op.substring]: `${query.agentName}`
-                        //         }
-                        //     }
-                        // ]
-                        fullName: {
-                            [Op.substring]: `${query.agentName}`
-                        }
-                    };
+                if (query.agentId) {
+                    whereTransaction.userId = Utilities.parseInt(query.agentId, 0);
                 }
             } else {
                 whereTransaction.userId = this.currentUser.id;
@@ -81,8 +64,7 @@ class TransactionService extends BaseService {
                     model: this.repository.models.User,
                     as: "user",
                     attributes: ["id", "firstName", "lastName", "deactivatedAt"],
-                    paranoid: false,
-                    where: whereAgentName,
+                    paranoid: false
                 },
                 {
                     model: this.repository.models.TransactionStatus,
@@ -92,7 +74,7 @@ class TransactionService extends BaseService {
                 {
                     model: this.repository.models.TransactionComment,
                     as: "transactionComments",
-                    attributes: ['id', 'comment', 'updatedAt'],
+                    attributes: ['id', 'userId', 'comment', 'updatedAt'],
                     limit: 2,
                     order: [
                         ['updatedAt', 'DESC'],
@@ -177,24 +159,29 @@ class TransactionService extends BaseService {
         }
     }
 
-    async status(transId, status) {
+    async status(transId, status, emailService) {
         try {
             const transaction = await this.repository.getById(transId, ['id', 'userId', 'transactionStatusId']);
             // Check transaction is exist.
             if (!transaction) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction is not found!");
-            
+
             // **Change to [IN PROCESS]: and transaction belongs to User and <- [NEW] or [ERROR]
             if (status === 2
                 && transaction.userId === this.currentUser.id
                 && (transaction.transactionStatusId === 1 || transaction.transactionStatusId === 5)) {
+
+                // Change to [IN PROCESS]
                 await this.repository.updateItemStatus(
                     {
-                        transactionStatusId: status
+                        transactionStatusId: status // [IN PROCESS]
                     },
                     {
                         id: transId
                     }
                 );
+
+                // Not send email
+
                 return {
                     transactionId: transId,
                     transactionStatusId: status
@@ -214,12 +201,27 @@ class TransactionService extends BaseService {
                 // Change to [REVIEW]
                 await this.repository.updateItemStatus(
                     {
-                        transactionStatusId: status
+                        transactionStatusId: status // [REVIEW]
                     },
                     {
                         id: transId
                     }
                 );
+
+                // Get list of email admin & Get info user's transaction
+                const [listOfEmailAdmin, user] = await Promise.all([
+                    this.repository.getEmailUserIsAdmin(),
+                    transaction.getUser({
+                        attributes: ['firstName', 'lastName', 'email'],
+                        raw: true
+                    })
+                ]);
+                transaction.user = user;
+                // Send email review status
+                const subject = emailService.reviewTransactionSubject(transId);
+                const content = emailService.reviewTransactionContent(transaction);
+                await emailService.sendMail(listOfEmailAdmin, subject, content);
+
                 return {
                     transactionId: transId,
                     transactionStatusId: status
@@ -230,14 +232,27 @@ class TransactionService extends BaseService {
             if (status === 4
                 && this.currentUser.isAdmin
                 && transaction.transactionStatusId === 3) {
+
+                // Change to [COMPLETE]
                 await this.repository.updateItemStatus(
                     {
-                        transactionStatusId: status
+                        transactionStatusId: status // [COMPLETE]
                     },
                     {
                         id: transId
                     }
                 );
+
+                // Get info user's transaction
+                transaction.user = await transaction.getUser({
+                    attributes: ['firstName', 'lastName', 'email'],
+                    raw: true
+                });
+                // Send email complete status
+                const subject = emailService.completedTransactionSubject(transId);
+                const content = emailService.completedTransactionContent(transaction);
+                await emailService.sendMail(transaction.user.email, subject, content);
+
                 return {
                     transactionId: transId,
                     transactionStatusId: status
@@ -248,14 +263,27 @@ class TransactionService extends BaseService {
             if (status === 5
                 && this.currentUser.isAdmin
                 && transaction.transactionStatusId === 3) {
+
+                // Change to [ERROR]
                 await this.repository.updateItemStatus(
                     {
-                        transactionStatusId: status
+                        transactionStatusId: status // [ERROR]
                     },
                     {
                         id: transId
                     }
                 );
+
+                // Get info user's transaction
+                transaction.user = await transaction.getUser({
+                    attributes: ['firstName', 'lastName', 'email'],
+                    raw: true
+                });
+                // Send email error status
+                const subject = emailService.errorTransactionSubject(transId);
+                const content = emailService.errorTransactionContent(transaction);
+                await emailService.sendMail(transaction.user.email, subject, content);
+
                 return {
                     transactionId: transId,
                     transactionStatusId: status

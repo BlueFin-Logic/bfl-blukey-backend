@@ -10,6 +10,7 @@ const routes = require("./routes");
 const Sequelize = require('./database/sequelize');
 const AzureStorageService = require('./common/azure-storage');
 const TokenService = require('./common/token');
+const EmailService = require('./common/email');
 
 module.exports = async () => {
     try {
@@ -39,7 +40,10 @@ module.exports = async () => {
             algorithm: config.tokenJWT.algorithm,
             expiresIn: config.tokenJWT.expiresIn
         };
+        // Set token to App Context
         appContext.setTokenJWT = new TokenService(token, options);
+        // Set email to App Context
+        appContext.setEmail = new EmailService(config.email.user, config.email.pass);
         // CORS
         app.use(cors());
         app.use(helmet());

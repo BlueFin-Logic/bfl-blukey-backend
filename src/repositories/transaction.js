@@ -122,6 +122,26 @@ class TransactionRepository extends BaseRepository {
             throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);
         }
     }
+
+    async getEmailUserIsAdmin() {
+        try {
+            const users = await this.models.User.findAll({
+                attributes: ['email'],
+                where: {
+                    isAdmin: true
+                },
+                raw: true
+            });
+
+            let listOfEmail = "";
+
+            users.forEach(user => listOfEmail += `${user.email},`);
+
+            return listOfEmail;
+        } catch (error) {
+            throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);
+        }
+    }
 }
 
 module.exports = TransactionRepository

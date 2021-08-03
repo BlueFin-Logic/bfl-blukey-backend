@@ -7,7 +7,7 @@ class BaseRepository {
         this.models = models;
     }
 
-    getAll(page, limit, fields, conditions = null, include = null) {
+    getAll(page, limit, fields, conditions = null, include = null, paranoid = true) {
         try {
             if (page < 1) page = 1;
             if (limit < 1) limit = 5;
@@ -17,6 +17,7 @@ class BaseRepository {
                 attributes: fields,
                 where: conditions,
                 include: include,
+                paranoid: paranoid,
                 offset: offset,
                 limit: limit,
                 order: [
@@ -28,23 +29,25 @@ class BaseRepository {
         }
     }
 
-    getById(id, fields, include = null) {
+    getById(id, fields, include = null, paranoid = true) {
         try {
             return this.table.findByPk(id, {
                 attributes: fields,
-                include: include
+                include: include,
+                paranoid: paranoid
             });
         } catch (error) {
             throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);
         }
     }
 
-    getOne(conditions, fields, include = null) {
+    getOne(conditions, fields, include = null, paranoid = true) {
         try {
             return this.table.findOne({
                 attributes: fields,
                 where: conditions,
-                include: include
+                include: include,
+                paranoid: paranoid
             });
         } catch (error) {
             throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);

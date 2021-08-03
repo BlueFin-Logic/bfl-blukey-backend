@@ -2,6 +2,7 @@ class AppContext {
     #db = null;
     #tokenJWT = null;
     #storage = null;
+    #email = null;
 
     set setDB(db){
         this.#db = db;
@@ -25,6 +26,14 @@ class AppContext {
 
     get getStorage(){
         return this.#storage;
+    }
+
+    set setEmail(email){
+        this.#email = email;
+    }
+
+    get getEmail(){
+        return this.#email;
     }
 }
 
