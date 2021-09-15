@@ -1,5 +1,3 @@
-// const Time = require('../../helper/time');
-
 module.exports = (sequelize, DataTypes, Model) => {
     class Transaction extends Model {
     }
@@ -23,65 +21,81 @@ module.exports = (sequelize, DataTypes, Model) => {
             allowNull: false,
             validate: {
                 len: [1, 100]
+            },
+            set(value) {
+                this.setDataValue('address', value.replace(/\s+/g, ' ').trim());
             }
         },
         city: {
-            type: DataTypes.STRING(15),
+            type: DataTypes.STRING(100),
             allowNull: false,
-            isAlpha: true,
             validate: {
-                len: [1, 15]
+                not: /[^a-zA-Z ]/,
+                len: [1, 100]
+            },
+            set(value) {
+                this.setDataValue('city', value.replace(/\s+/g, ' ').trim());
             }
         },
         state: {
             type: DataTypes.STRING(2),
             allowNull: false,
-            isAlpha: true,
             validate: {
+                isAlpha: true,
                 len: [1, 2]
+            },
+            set(value) {
+                this.setDataValue('state', value.toUpperCase());
             }
         },
         zipCode: {
             type: DataTypes.STRING(10),
             allowNull: false,
-            isAlphanumeric: true,
             validate: {
+                isNumeric: true,
                 len: [1, 10]
             }
         },
         mlsId: {
             type: DataTypes.STRING(20),
             allowNull: false,
-            isAlphanumeric: true,
             validate: {
+                // isAlphanumeric: true,
                 len: [1, 20]
             }
         },
         apn: {
             type: DataTypes.STRING(50),
             allowNull: false,
-            isAlphanumeric: true,
             validate: {
+                // is: /\d{3}-\d{3}-\d{3}$/,
                 len: [1, 50]
             }
         },
         listingPrice: {
             type: DataTypes.DECIMAL(20,4),
             allowNull: false,
-            isAlphanumeric: true,
-            min: 0
+            validate: {
+                isNumeric: true,
+                min: 0
+            }
         },
         commissionAmount: {
             type: DataTypes.DECIMAL(20,4),
             allowNull: false,
-            isAlphanumeric: true,
-            min: 0
+            validate: {
+                isNumeric: true,
+                min: 0
+            }
         },
         buyerName: {
             type: DataTypes.STRING(50),
             allowNull: false,
             validate: {
                 len: [1, 50]
+            },
+            set(value) {
+                this.setDataValue('buyerName', value.replace(/\s+/g, ' ').trim());
             }
         },
         sellerName: {
@@ -89,29 +103,32 @@ module.exports = (sequelize, DataTypes, Model) => {
             allowNull: false,
             validate: {
                 len: [1, 50]
+            },
+            set(value) {
+                this.setDataValue('sellerName', value.replace(/\s+/g, ' ').trim());
             }
         },
         transactionStatusId: {
             type: DataTypes.SMALLINT,
             allowNull: false,
+            defaultValue: 1
             // references: {
             //     model: 'TransactionStatus',
             //     key: 'id'
             // }
         },
+        isListing: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: true
+        },
         listingStartDate: {
             type: DataTypes.DATEONLY,
-            allowNull: false,
-            // get() {
-            //     return Time.formatTimeToStringDate(this.getDataValue('listingStartDate'));
-            // }
+            allowNull: false
         },
         listingEndDate: {
             type: DataTypes.DATEONLY,
-            allowNull: false,
-            // get() {
-            //     return Time.formatTimeToStringDate(this.getDataValue('listingEndDate'));
-            // }
+            allowNull: false
         },
         createdAt: {
             type: DataTypes.DATE,

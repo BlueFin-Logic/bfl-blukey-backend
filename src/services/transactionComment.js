@@ -10,7 +10,7 @@ class TransactionCommentService extends BaseService {
         try {
             if (!this.currentUser.isAdmin) {
                 const transaction = await this.repository.getTransactionInfo(transactionId, this.currentUser.id);
-                if (!transaction) throw CustomError.badRequest(`${this.tableName} Handler`, "User is not belong to transaction!")
+                if (!transaction) throw CustomError.badRequest(`${this.tableName} Service`, "User is not belong to transaction!")
             }
             const result = await this.repository.getByCondition({transactionId: transactionId});
             return result;
@@ -24,7 +24,7 @@ class TransactionCommentService extends BaseService {
         try {
             if (!this.currentUser.isAdmin) {
                 const transaction = await this.repository.getTransactionInfo(data.transactionId, this.currentUser.id);
-                if (!transaction) throw CustomError.badRequest(`${this.tableName} Handler`, "User is not belong to transaction!")
+                if (!transaction) throw CustomError.badRequest(`${this.tableName} Service`, "User is not belong to transaction!")
             }
 
             data.userId = this.currentUser.id;
@@ -34,7 +34,7 @@ class TransactionCommentService extends BaseService {
             }
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotCreateEntity(`${this.tableName} Handler`, this.tableName, err);
+            throw CustomError.cannotCreateEntity(`${this.tableName} Service`, this.tableName, err);
         }
     }
 
@@ -45,7 +45,7 @@ class TransactionCommentService extends BaseService {
                 userId: this.currentUser.id
             };
             let transCommentExist = await this.repository.getOne(conditions);
-            if (!transCommentExist) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction comment is not belong to you!");
+            if (!transCommentExist) throw CustomError.badRequest(`${this.tableName} Service`, "Transaction comment is not belong to you!");
 
             const result = await this.repository.updateItem(data, conditions);
             return {
@@ -53,7 +53,7 @@ class TransactionCommentService extends BaseService {
             }
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotUpdateEntity(`${this.tableName} Handler`, this.tableName, err);
+            throw CustomError.cannotUpdateEntity(`${this.tableName} Service`, this.tableName, err);
         }
     }
 
@@ -64,7 +64,7 @@ class TransactionCommentService extends BaseService {
                 userId: this.currentUser.id
             };
             let transCommentExist = await this.repository.getOne(conditions);
-            if (!transCommentExist) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction comment is not belong to you!");
+            if (!transCommentExist) throw CustomError.badRequest(`${this.tableName} Service`, "Transaction comment is not belong to you!");
 
             await this.repository.deleteItem(conditions);
             return {
@@ -72,7 +72,7 @@ class TransactionCommentService extends BaseService {
             }
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotDeleteEntity(`${this.tableName} Handler`, this.tableName, err);
+            throw CustomError.cannotDeleteEntity(`${this.tableName} Service`, this.tableName, err);
         }
     }
 }

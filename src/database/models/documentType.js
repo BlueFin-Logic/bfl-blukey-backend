@@ -20,6 +20,16 @@ module.exports = (sequelize, DataTypes, Model) => {
             allowNull: false,
             defaultValue: false
         },
+        isListing: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: true
+        },
+        isBoth: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: true
+        },
         createdAt: {
             type: DataTypes.DATE,
             allowNull: false,

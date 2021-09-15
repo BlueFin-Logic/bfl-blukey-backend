@@ -7,7 +7,7 @@ class BaseRepository {
         this.models = models;
     }
 
-    getAll(page, limit, fields, conditions = null, include = null, paranoid = true) {
+    getAll(page, limit, fields, conditions = null, include = null, paranoid = true, distinct = false) {
         try {
             if (page < 1) page = 1;
             if (limit < 1) limit = 5;
@@ -23,6 +23,12 @@ class BaseRepository {
                 order: [
                     ['updatedAt', 'DESC'],
                 ],
+                distinct: distinct,
+                logging: (sql, timing, queryObject) => console.log({
+                    sql: sql,
+                    timing: timing,
+                    queryObject: queryObject
+                }),
             });
         } catch (error) {
             throw CustomError.cannotListEntity(`${this.tableName} Repository`, this.tableName, error);
@@ -54,37 +60,56 @@ class BaseRepository {
         }
     }
 
-    getByCondition(conditions, fields, include = null, order = null, paranoid = true) {
+    getByCondition(conditions, fields, include = null, order = null, paranoid = true, group = null) {
         try {
             return this.table.findAll({
                 attributes: fields,
                 where: conditions,
                 include: include,
                 order: order,
-                paranoid: paranoid
+                paranoid: paranoid,
+                group: group
             });
         } catch (error) {
             throw CustomError.cannotListEntity(`${this.tableName} Repository`, this.tableName, error);
         }
     }
 
-    addItem(data, fields = null) {
+    addItem(data, fields = null, transaction = null) {
         try {
             delete data.id;
             delete data.createdAt;
             delete data.updatedAt;
             delete data.deletedAt;
+            delete data.deactivatedAt;
 
             return this.table.create(data, {
                 fields: fields,
-                validate: true
+                validate: true,
+                transaction: transaction
             });
         } catch (error) {
             throw CustomError.cannotCreateEntity(`${this.tableName} Repository`, this.tableName, error);
         }
     }
 
-    updateItem(data, conditions, fields = null) {
+    // buildItem(data, raw = false) {
+    //     try {
+    //         delete data.id;
+    //         delete data.createdAt;
+    //         delete data.updatedAt;
+    //         delete data.deletedAt;
+    //         delete data.deactivatedAt;
+
+    //         return this.table.build(data, {
+    //             raw: raw
+    //         });
+    //     } catch (error) {
+    //         throw CustomError.cannotCreateEntity(`${this.tableName} Repository`, this.tableName, error);
+    //     }
+    // }
+
+    updateItem(data, conditions, fields = null, transaction = null) {
         try {
             delete data.id;
             delete data.createdAt;
@@ -94,7 +119,8 @@ class BaseRepository {
             return this.table.update(data, {
                 where: conditions,
                 fields: fields,
-                validate: true
+                validate: true,
+                transaction: transaction
             });
         } catch (error) {
             throw CustomError.cannotUpdateEntity(`${this.tableName} Repository`, this.tableName, error);
@@ -109,11 +135,12 @@ class BaseRepository {
         }
     }
 
-    deleteItem(conditions, hard = false) {
+    deleteItem(conditions, hard = false, transaction = null) {
         try {
             return this.table.destroy({
                 where: conditions,
-                force: hard
+                force: hard,
+                transaction: transaction
             });;
         } catch (error) {
             throw CustomError.cannotDeleteEntity(`${this.tableName} Repository`, this.tableName, error);

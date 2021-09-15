@@ -27,16 +27,28 @@ class TransactionRepository extends BaseRepository {
 
     getAll(page, limit, fields = null, conditions = null, include = null) {
         if (!fields) fields = defaultFields;
-        return super.getAll(page, limit, fields, conditions, include);
+        return super.getAll(page, limit, fields, conditions, include, true, true);
     }
 
-    // countDocumentTypeRequired(required = true) {
-    //     try {
-    //         return this.models.DocumentType.count({ where: { isRequired: required } });
-    //     } catch (error) {
-    //         throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);
-    //     }
-    // }
+    countDocumentTypeRequired(isListing = true) { // isListing or isBuying
+        try {
+            return this.models.DocumentType.count({
+                where: {
+                    isRequired: true,
+                    [Op.or]: [
+                        {
+                            isBoth: true
+                        },
+                        {
+                            isListing: isListing
+                        }
+                    ]
+                }
+            });
+        } catch (error) {
+            throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);
+        }
+    }
     
     getById(id, fields = null, include = null) {
         if (!fields) fields = defaultFields;
@@ -48,9 +60,14 @@ class TransactionRepository extends BaseRepository {
         return super.getOne(conditions, fields, include);
     }
 
+    getByCondition(conditions, fields = null, include = null, order = null , paranoid = true, group = null) {
+        if (!fields) fields = defaultFields;
+        return super.getByCondition(conditions, fields, include , order, paranoid, group);
+    }
+
     addItem(data) {
         try {
-            data.transactionStatusId = 1; // Status NEW
+            // data.transactionStatusId = 1; // Status NEW
             data.listingStartDate = Time.formatTimeUTCToString(data.listingStartDate);
             data.listingEndDate = Time.formatTimeUTCToString(data.listingEndDate);
             const fields = [
@@ -65,6 +82,7 @@ class TransactionRepository extends BaseRepository {
                 'commissionAmount',
                 'buyerName',
                 'sellerName',
+                'isListing',
                 'transactionStatusId',
                 'listingStartDate',
                 'listingEndDate'
@@ -87,6 +105,7 @@ class TransactionRepository extends BaseRepository {
             'commissionAmount',
             'buyerName',
             'sellerName',
+            'isListing',
             'listingStartDate',
             'listingEndDate'
         ];
@@ -98,24 +117,32 @@ class TransactionRepository extends BaseRepository {
         return super.updateItem(data, conditions, fields);
     }
 
-    getRestDocumentTypeRequired(transactionId, required = true) {
+    getRestDocumentTypeRequired(transactionId, transactionIsListing) {
         try {
             return this.models.DocumentType.findAll({
-                attributes: ["id", "name", "isRequired"],
+                attributes: ["id"],
                 include: {
                     model: this.models.TransactionDocumentType,
                     as: "transactionDocumentTypes",
+                    attributes: ['fileName'],
                     where: {
                         transactionId: transactionId
                     },
-                    attributes: ['fileName'],
                     required: false
                 },
                 where: {
                     '$transactionDocumentTypes.fileName$': {
                         [Op.eq]: null
                     },
-                    isRequired: required
+                    isRequired: true,
+                    [Op.or]: [
+                        {
+                            isBoth: true
+                        },
+                        {
+                            isListing: transactionIsListing
+                        }
+                    ]
                 }
             });
         } catch (error) {
@@ -123,12 +150,15 @@ class TransactionRepository extends BaseRepository {
         }
     }
 
-    async getEmailUserIsAdmin() {
+    async getEmailUserIsAdminWithoutMe(userId) {
         try {
             const users = await this.models.User.findAll({
                 attributes: ['email'],
                 where: {
-                    isAdmin: true
+                    isAdmin: true,
+                    id: {
+                        [Op.not]: userId
+                    }
                 },
                 raw: true
             });

@@ -27,20 +27,19 @@ class UserRepository extends BaseRepository {
         return super.getOne(conditions, fields, include);
     }
 
-    addItem(data) {
+    addItem(data, transaction = null) {
         data.lastLoginDate = Time.getLatestTimeUTC();
-        const fields = ['firstName', 'lastName', 'fullName', 'email', 'address', 'userName', 'password', 'isAdmin', 'lastLoginDate'];
-        return super.addItem(data, fields);
+        const fields = ['firstName', 'lastName', 'fullName', 'email', 'address', 'userName', 'password', 'lastLoginDate', 'isAdmin'];
+        return super.addItem(data, fields, transaction);
     }
 
-    updateItem(userName, data, conditions) {
-        data.userName = userName; // for hash pass
-        const fields = ['firstName', 'lastName', 'fullName', 'email', 'address', 'userName', 'password' ,'lastLoginDate', 'isAdmin'];
-        return super.updateItem(data, conditions, fields);
+    updateItem(data, conditions, transaction = null) {
+        const fields = ['firstName', 'lastName', 'fullName', 'email', 'address', 'password' ,'lastLoginDate', 'isAdmin'];
+        return super.updateItem(data, conditions, fields, transaction);
     }
 
-    deleteItem(conditions) {
-        return super.deleteItem(conditions, false);
+    deleteItem(conditions, transaction = null) {
+        return super.deleteItem(conditions, false, transaction);
     }
 }
 

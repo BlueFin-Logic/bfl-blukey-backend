@@ -23,7 +23,8 @@ class EmailService {
                 html: content
             });
         } catch (error) {
-            return error;
+            console.log(error);
+            return null;
         }
     }
 
@@ -35,7 +36,8 @@ class EmailService {
         try {
             return `[Review] Transaction Number: ${transactionId}`;
         } catch (error) {
-            return "Something went wrong when init subject for review transaction";
+            console.log("Something went wrong when init subject for review transaction");
+            return null;
         }
     }
 
@@ -43,7 +45,8 @@ class EmailService {
         try {
             return `[Completed] Transaction Number: ${transactionId}`;
         } catch (error) {
-            return "Something went wrong when init subject for completed transaction";
+            console.log("Something went wrong when init subject for completed transaction");
+            return null;
         }
     }
 
@@ -51,32 +54,34 @@ class EmailService {
         try {
             return `[Error] Transaction Number: ${transactionId}`;
         } catch (error) {
-            return "Something went wrong when init subject for error transaction";
+            console.log("Something went wrong when init subject for error transaction");
+            return null;
         }
     }
 
-    newUserContent(user) {
+    newUserContent(user, password) {
         try {
             return `<p>Hi <strong>${user.firstName} ${user.lastName}</strong>,</p>
                     <p>This is information about your account:</p>
                     <ul>
-                        <li>First name:&nbsp;${user.firstName}</li>
+                        <li>First name: ${user.firstName}</li>
                         <li>Last name: ${user.lastName}</li>
-                        <li>Email:&nbsp;${user.email}</li>
-                        <li>Username:&nbsp;${user.userName}</li>
-                        <li>Password:&nbsp;${user.password}</li>
+                        <li>Email: ${user.email}</li>
+                        <li>Username: ${user.userName}</li>
+                        <li>Password: ${password}</li>
                     </ul>
                     <p>Regards,<br>
                         Admin</p>`;
         } catch (error) {
-            return "Something went wrong when init content for new user. Please contact the administrator immediately";
+            console.log("Something went wrong when init content for new user. Please contact the administrator immediately");
+            return null;
         }
     }
 
     reviewTransactionContent(transaction) {
         try {
-            return `<p>Hi all <strong>Admin</strong>,</p>
-                    <p>Your transaction has change status to Review:</p>
+            return `<p>Hi <strong>Admin</strong>,</p>
+                    <p>Transaction with ID: ${transaction.id} has change status to Review:</p>
                     <ul>
                         <li>ID: ${transaction.id}</li>
                         <li>Address: ${transaction.address}</li>
@@ -96,7 +101,8 @@ class EmailService {
                     <p>Regards,<br />
                         ${transaction.user.firstName} ${transaction.user.lastName}</p>`;
         } catch (error) {
-            return "Something went wrong when init content for review transaction. Please contact the administrator immediately";
+            console.log("Something went wrong when init content for review transaction. Please contact the administrator immediately");
+            return null;
         }
     }
 
@@ -123,7 +129,8 @@ class EmailService {
                     <p>Regards,<br />
                         Admin</p>`;
         } catch (error) {
-            return "Something went wrong when init content for completed transaction. Please contact the administrator immediately";
+            console.log("Something went wrong when init content for completed transaction. Please contact the administrator immediately");
+            return null;
         }
     }
 
@@ -150,7 +157,8 @@ class EmailService {
                     <p>Regards,<br />
                         Admin</p>`;
         } catch (error) {
-            return "Something went wrong when init content for error transaction. Please contact the administrator immediately";
+            console.log("Something went wrong when init content for error transaction. Please contact the administrator immediately");
+            return null;
         }
     }
 }

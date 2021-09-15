@@ -37,28 +37,24 @@ class TransactionService extends BaseService {
             if (query.transactionStatusId) {
                 whereTransaction.transactionStatusId = Utilities.parseInt(query.transactionStatusId, 0);
             }
+            if (query.address) {
+                whereTransaction.address = {
+                    [Op.substring]: `${query.address}`
+                };
+            }
+            if (query.buyerName) {
+                whereTransaction.buyerName = query.buyerName;
+            }
+            if (query.sellerName) {
+                whereTransaction.sellerName = query.sellerName;
+            }
+            if (query.isListing) {
+                whereTransaction.isListing = query.isListing;
+            }
 
             const fields = [
-                'id', 'address', 'city', 'state', 'zipCode', 'mlsId', 'apn', 'listingPrice', 'commissionAmount', 'buyerName', 'sellerName', 'listingStartDate', 'listingEndDate',
-                [
-                    Sequelize.literal(`(
-                            SELECT COUNT([TransactionDocumentType].[transactionId])
-                            FROM [TransactionDocumentType]
-                            INNER JOIN [DocumentType] ON [DocumentType].[id] = [TransactionDocumentType].[documentTypeId]
-                            WHERE [TransactionDocumentType].[transactionId] = [Transaction].[id] AND [DocumentType].[isRequired] = 1 AND [DocumentType].[deletedAt] IS NULL
-                        )`),
-                    'totalDocumentUploadedRequired'
-                ],
-                [
-                    Sequelize.literal(`(
-                            SELECT COUNT([DocumentType].[id])
-                            FROM [DocumentType]
-                            WHERE [DocumentType].[isRequired] = 1 AND [DocumentType].[deletedAt] IS NULL
-                        )`),
-                    'totalDocumentRequired'
-                ]
+                'id', 'address', 'city', 'state', 'zipCode', 'mlsId', 'apn', 'listingPrice', 'commissionAmount', 'buyerName', 'sellerName', 'isListing', 'listingStartDate', 'listingEndDate', 'updatedAt',
             ];
-
             const include = [
                 {
                     model: this.repository.models.User,
@@ -80,13 +76,50 @@ class TransactionService extends BaseService {
                         ['updatedAt', 'DESC'],
                     ]
                 },
+                {
+                    model: this.repository.models.DocumentType,
+                    as: "documentTypes",
+                    attributes: ["id"],
+                    required: false,
+                    through: {
+                        as: "transactionDocumentTypes",
+                        attributes: []
+                    },
+                    where: {
+                        isRequired: true,
+                        [Op.or]: [
+                            {
+                                isBoth: true
+                            },
+                            {
+                                isListing: {
+                                    [Op.eq]: Sequelize.col('[Transaction].[isListing]')
+                                }
+                            }
+                        ]
+                    }
+                }
             ];
 
-            const {count, rows} = await this.repository.getAll(page, limit, fields, whereTransaction, include);
+            const [{ count, rows }, totalIsListing, totalIsBuying] = await Promise.all([
+                // Get all Transaction
+                this.repository.getAll(page, limit, fields, whereTransaction, include),
+                // Count DocumentType Required Is Listing
+                this.repository.countDocumentTypeRequired(true),
+                // Count DocumentType Required Is Buying
+                this.repository.countDocumentTypeRequired(false)
+            ]);
 
             return {
                 total: count,
-                data: rows
+                data: rows.map(row => {
+                    const { documentTypes } = row;
+                    return {
+                        ...row.toJSON(),
+                        totalDocumentUploadedRequired: documentTypes.length,
+                        totalDocumentRequired: row.isListing ? totalIsListing : totalIsBuying
+                    }
+                })
             };
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
@@ -118,7 +151,59 @@ class TransactionService extends BaseService {
 
             const transaction = await this.repository.getOne(conditions, null, include);
             // Check transaction is exist.
-            if (!transaction) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction is not found!");
+            if (!transaction) throw CustomError.badRequest(`${this.tableName} Service`, "Transaction is not found!");
+            return transaction;
+        } catch (err) {
+            if (err instanceof CustomError.CustomError) throw err;
+            throw CustomError.cannotGetEntity(`${this.tableName} Service`, this.tableName, err);
+        }
+    }
+
+    async suggest(query) {
+        try {
+            const {
+                buyerName,
+                sellerName
+            } = query;
+
+            if (!buyerName && !sellerName) throw CustomError.badRequest(`${this.tableName} Service`, "Record is not found!");
+
+            let conditions = {};
+            let fields = [];
+            let group = [];
+            let order = [];
+
+            if (buyerName) {
+                conditions = {
+                    buyerName: {
+                        [Op.substring]: `${buyerName}`
+                    }
+                };
+                fields = ['buyerName'];
+                group = ['buyerName'];
+                order = [
+                    ['buyerName', 'ASC']
+                ]
+            }
+
+            if (sellerName) {
+                conditions = {
+                    sellerName: {
+                        [Op.substring]: `${sellerName}`
+                    }
+                };
+                fields = ['sellerName'];
+                group = ['sellerName'];
+                order = [
+                    ['sellerName', 'ASC']
+                ]
+            }
+
+            if (!this.currentUser.isAdmin) conditions.userId = this.currentUser.id;
+
+            const transaction = await this.repository.getByCondition(conditions, fields, null, order, true, group);
+            // Check transaction is exist.
+            if (!transaction) throw CustomError.badRequest(`${this.tableName} Service`, "Record is not found!");
             return transaction;
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
@@ -135,7 +220,7 @@ class TransactionService extends BaseService {
             }
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotCreateEntity(`${this.tableName} Handler`, this.tableName, err);
+            throw CustomError.cannotCreateEntity(`${this.tableName} Service`, this.tableName, err);
         }
     }
 
@@ -143,27 +228,27 @@ class TransactionService extends BaseService {
         try {
             const transactionExist = await this.repository.getById(transId, ['id', 'userId', 'transactionStatusId']);
             // Check transaction is exist.
-            if (!transactionExist) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction is not found!");
+            if (!transactionExist) throw CustomError.badRequest(`${this.tableName} Service`, "Transaction is not found!");
             // Check transaction belongs to User.
-            if (transactionExist.userId !== this.currentUser.id) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction is not belong to you!");
+            if (transactionExist.userId !== this.currentUser.id) throw CustomError.badRequest(`${this.tableName} Service`, "Transaction is not belong to you!");
             // Only permission update when status is NEW(1) or IN PROCESS(2)
-            if (transactionExist.transactionStatusId !== 1 && transactionExist.transactionStatusId !== 2) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction can not update because status is not NEW or IN PROCESS!");
+            if (transactionExist.transactionStatusId !== 1 && transactionExist.transactionStatusId !== 2) throw CustomError.badRequest(`${this.tableName} Service`, "Transaction can not update because status is not NEW or IN PROCESS!");
 
-            let result = await this.repository.updateItem(data, {id: transId});
+            const result = await this.repository.updateItem(data, {id: transId});
             return {
                 rowEffects: result.length
             };
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotUpdateEntity(`${this.tableName} Handler`, this.tableName, err);
+            throw CustomError.cannotUpdateEntity(`${this.tableName} Service`, this.tableName, err);
         }
     }
 
     async status(transId, status, emailService) {
         try {
-            const transaction = await this.repository.getById(transId, ['id', 'userId', 'transactionStatusId']);
+            const transaction = await this.repository.getById(transId, ['id', 'userId', 'transactionStatusId', 'address', 'city', 'state', 'zipCode', 'mlsId', 'apn', 'listingPrice', 'commissionAmount', 'buyerName', 'sellerName', 'isListing', 'listingStartDate', 'listingEndDate', 'createdAt', 'updatedAt']);
             // Check transaction is exist.
-            if (!transaction) throw CustomError.badRequest(`${this.tableName} Handler`, "Transaction is not found!");
+            if (!transaction) throw CustomError.badRequest(`${this.tableName} Service`, "Transaction is not found!");
 
             // **Change to [IN PROCESS]: and transaction belongs to User and <- [NEW] or [ERROR]
             if (status === 2
@@ -193,34 +278,37 @@ class TransactionService extends BaseService {
                 && transaction.userId === this.currentUser.id
                 && transaction.transactionStatusId === 2) {
 
-                // Check no rest document required not uploaded
-                const rest = await this.repository.getRestDocumentTypeRequired(transId, true);
+                // Check no document required not uploaded
+                const rest = await this.repository.getRestDocumentTypeRequired(transId, transaction.isListing);
 
-                if (rest.length > 0) throw CustomError.badRequest(`${this.tableName} Handler`, "Need upload all required documents before change status to review!");
+                if (rest.length > 0) throw CustomError.badRequest(`${this.tableName} Service`, "Need upload all required documents before change status to review!");
 
-                // Change to [REVIEW]
-                await this.repository.updateItemStatus(
-                    {
-                        transactionStatusId: status // [REVIEW]
-                    },
-                    {
-                        id: transId
-                    }
-                );
-
-                // Get list of email admin & Get info user's transaction
                 const [listOfEmailAdmin, user] = await Promise.all([
-                    this.repository.getEmailUserIsAdmin(),
+                    // Get list of email admin without me
+                    this.repository.getEmailUserIsAdminWithoutMe(this.currentUser.id),
+                    // Get info user's transaction
                     transaction.getUser({
                         attributes: ['firstName', 'lastName', 'email'],
                         raw: true
-                    })
+                    }),
+                    // Change to [REVIEW]
+                    this.repository.updateItemStatus(
+                        {
+                            transactionStatusId: status // [REVIEW]
+                        },
+                        {
+                            id: transId
+                        }
+                    )
                 ]);
+
                 transaction.user = user;
                 // Send email review status
-                const subject = emailService.reviewTransactionSubject(transId);
-                const content = emailService.reviewTransactionContent(transaction);
-                await emailService.sendMail(listOfEmailAdmin, subject, content);
+                emailService.sendMail(
+                    listOfEmailAdmin,
+                    emailService.reviewTransactionSubject(transId),
+                    emailService.reviewTransactionContent(transaction)
+                );
 
                 return {
                     transactionId: transId,
@@ -233,25 +321,30 @@ class TransactionService extends BaseService {
                 && this.currentUser.isAdmin
                 && transaction.transactionStatusId === 3) {
 
-                // Change to [COMPLETE]
-                await this.repository.updateItemStatus(
-                    {
-                        transactionStatusId: status // [COMPLETE]
-                    },
-                    {
-                        id: transId
-                    }
-                );
+                const [user] = await Promise.all([
+                    // Get info user's transaction
+                    transaction.getUser({
+                        attributes: ['firstName', 'lastName', 'email'],
+                        raw: true
+                    }),
+                    // Change to [COMPLETE]
+                    this.repository.updateItemStatus(
+                        {
+                            transactionStatusId: status // [COMPLETE]
+                        },
+                        {
+                            id: transId
+                        }
+                    )
+                ]);
 
-                // Get info user's transaction
-                transaction.user = await transaction.getUser({
-                    attributes: ['firstName', 'lastName', 'email'],
-                    raw: true
-                });
+                transaction.user = user;
                 // Send email complete status
-                const subject = emailService.completedTransactionSubject(transId);
-                const content = emailService.completedTransactionContent(transaction);
-                await emailService.sendMail(transaction.user.email, subject, content);
+                emailService.sendMail(
+                    transaction.user.email,
+                    emailService.completedTransactionSubject(transId),
+                    emailService.completedTransactionContent(transaction)
+                );
 
                 return {
                     transactionId: transId,
@@ -264,25 +357,30 @@ class TransactionService extends BaseService {
                 && this.currentUser.isAdmin
                 && transaction.transactionStatusId === 3) {
 
-                // Change to [ERROR]
-                await this.repository.updateItemStatus(
-                    {
-                        transactionStatusId: status // [ERROR]
-                    },
-                    {
-                        id: transId
-                    }
-                );
+                const [user] = await Promise.all([
+                    // Get info user's transaction
+                    transaction.getUser({
+                        attributes: ['firstName', 'lastName', 'email'],
+                        raw: true
+                    }),
+                    // Change to [ERROR]
+                    this.repository.updateItemStatus(
+                        {
+                            transactionStatusId: status // [ERROR]
+                        },
+                        {
+                            id: transId
+                        }
+                    )
+                ]);
 
-                // Get info user's transaction
-                transaction.user = await transaction.getUser({
-                    attributes: ['firstName', 'lastName', 'email'],
-                    raw: true
-                });
+                transaction.user = user;
                 // Send email error status
-                const subject = emailService.errorTransactionSubject(transId);
-                const content = emailService.errorTransactionContent(transaction);
-                await emailService.sendMail(transaction.user.email, subject, content);
+                emailService.sendMail(
+                    transaction.user.email,
+                    emailService.errorTransactionSubject(transId),
+                    emailService.errorTransactionContent(transaction)
+                );
 
                 return {
                     transactionId: transId,
@@ -290,10 +388,10 @@ class TransactionService extends BaseService {
                 }
             }
 
-            throw CustomError.badRequest(`${this.tableName} Handler`, `Cannot update status for transaction Id: ${transId}`);
+            throw CustomError.badRequest(`${this.tableName} Service`, `Cannot update status for transaction Id: ${transId}`);
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotUpdateEntity(`${this.tableName} Handler`, this.tableName, err);
+            throw CustomError.cannotUpdateEntity(`${this.tableName} Service`, this.tableName, err);
         }
     }
 }

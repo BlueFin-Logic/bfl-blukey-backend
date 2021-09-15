@@ -1,9 +1,9 @@
-const appContext = require("./common/app-context");
+const AppContext = require("./common/app-context");
 const express = require("express");
 const app = express();
 const cors = require('cors');
 const helmet = require("helmet");
-const config = require('./config');
+const CONFIG = require('./config');
 const responseErrorMiddleware = require("./middleware/res-err");
 const CustomError = require('./common/error');
 const routes = require("./routes");
@@ -11,13 +11,14 @@ const Sequelize = require('./database/sequelize');
 const AzureStorageService = require('./common/azure-storage');
 const TokenService = require('./common/token');
 const EmailService = require('./common/email');
+const LoggingDbService = require('./repositories/LoggingDb');
 
 module.exports = async () => {
     try {
         // DB
-        const {models, sequelize} = Sequelize(config.database);
+        const {models, sequelize} = Sequelize(CONFIG.database);
         // Create azure storage
-        const storage = new AzureStorageService(config.azureStorage.storageName, config.azureStorage.storageKey);
+        const storage = new AzureStorageService(CONFIG.azureStorage.storageName, CONFIG.azureStorage.storageKey);
         // Check connect to DB, Azure Storage
         await Promise.all([
             sequelize.authenticate(),
@@ -27,23 +28,24 @@ module.exports = async () => {
         // await sequelize.sync({alfter: true});
         // await sequelize.sync({force: true});
 
-        // Set model to DB App Context
-        appContext.setDB = models;
-        // Set storage to App Context
-        appContext.setStorage = storage;
-        // Get setting token config
-        const token = config.tokenJWT.token_secret;
-        const options = {
-            issuer: config.tokenJWT.issuer,
-            subject: config.tokenJWT.subject,
-            audience: config.tokenJWT.audience,
-            algorithm: config.tokenJWT.algorithm,
-            expiresIn: config.tokenJWT.expiresIn
-        };
-        // Set token to App Context
-        appContext.setTokenJWT = new TokenService(token, options);
-        // Set email to App Context
-        appContext.setEmail = new EmailService(config.email.user, config.email.pass);
+        // App Context
+        const appContext = new AppContext(
+            models,
+            sequelize,
+            new TokenService(
+                CONFIG.tokenJWT.token_secret,
+                {
+                    issuer: CONFIG.tokenJWT.issuer,
+                    subject: CONFIG.tokenJWT.subject,
+                    audience: CONFIG.tokenJWT.audience,
+                    algorithm: CONFIG.tokenJWT.algorithm,
+                    expiresIn: CONFIG.tokenJWT.expiresIn
+                }
+            ),
+            storage, // STORAGE
+            new EmailService(CONFIG.email.user, CONFIG.email.pass), // EMAIL
+            new LoggingDbService(models) // LOGINGDB
+        );
         // CORS
         app.use(cors());
         app.use(helmet());
@@ -59,12 +61,12 @@ module.exports = async () => {
         // handle response & error
         app.use(responseErrorMiddleware);
         // Start express server
-        app.listen(config.port, () => {
-            console.log(`Server started at http://localhost:${config.port}`);
+        app.listen(CONFIG.port, () => {
+            console.log(`Server started at http://localhost:${CONFIG.port}`);
         });
     } catch (err) {
         if (err instanceof CustomError.CustomError) console.log(err);
         console.log(CustomError.badRequest("Setup Connection", "Can not setup connection with services.", err));
-        // return next(err) because data before req just passing function, not router
+        // next(something) just pass 'data' before 'req' from mid to mid, not pass through to router.
     }
 }

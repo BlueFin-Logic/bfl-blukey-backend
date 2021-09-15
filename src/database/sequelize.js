@@ -15,7 +15,12 @@ module.exports = (config) => {
                 min: 0,
                 acquire: 30000,
                 idle: 10000
-            }
+            },
+            logging: (sql, timing) => console.log({
+                sql: sql,
+                timing: timing
+            }),
+            benchmark: true
         });
 
         const models = Models(sequelize, DataTypes, Model);
@@ -25,6 +30,6 @@ module.exports = (config) => {
             sequelize: sequelize,
         };
     } catch (error) {
-        throw err;
+        throw error;
     }
 }

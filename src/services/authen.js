@@ -1,6 +1,6 @@
 // const BaseService = require('../services/base');
 const CustomError = require('../common/error');
-const hash = require('../helper/hash');
+const Hash = require('../helper/hash');
 const Time = require('../helper/time');
 
 class AuthenService {
@@ -11,20 +11,22 @@ class AuthenService {
 
     async login(item, token) {
         try {
-            let itemUserName = item.userName;
-            let itemPassword = item.password;
+            const {
+                userName: itemUserName,
+                password: itemPassword
+            } = item;
 
-            let fields = ['id', 'firstName', 'lastName', 'fullName', 'email', 'address', 'userName', 'password', 'isAdmin', 'lastLoginDate'];
-            let userExist = await this.repository.getOne({userName: itemUserName}, fields);
+            const fields = ['id', 'firstName', 'lastName', 'fullName', 'email', 'address', 'userName', 'password', 'isAdmin', 'lastLoginDate'];
+            const userExist = await this.repository.getOne({userName: itemUserName.toLowerCase()}, fields);
 
             // Check user is exist.
-            if (!userExist) throw CustomError.badRequest(`Authentication Handler`, "User is not found!");
+            if (!userExist) throw CustomError.badRequest(`Authentication Service`, "User is not found!");
 
             // Check user correct pass.
-            if (userExist.password !== hash.hashPassword(userExist.userName, itemPassword)) throw CustomError.badRequest(`Authentication Handler`, "Invalid password!");
+            if (!await Hash.compareHash(itemPassword, userExist.password)) throw CustomError.badRequest(`Authentication Service`, "Invalid password!");
 
             // Update last login date
-            let user = {
+            const user = {
                 lastLoginDate: Time.getLatestTimeUTC()
             }
             await this.repository.updateItem(userExist.userName, user, {id: userExist.id});
@@ -34,7 +36,7 @@ class AuthenService {
                 isAdmin: userExist.isAdmin
             }
 
-            let {password, lastLoginDate, ...rest} = userExist.toJSON()
+            const {password, lastLoginDate, ...rest} = userExist.toJSON();
 
             return {
                 accessToken: token.sign(data, userExist.email),
@@ -46,19 +48,19 @@ class AuthenService {
             }
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.unauthorized(`Authentication Handler`, `Unauthorized.`, err);
+            throw CustomError.unauthorized(`Authentication Service`, `Unauthorized.`, err);
         }
     }
 
     async authorized(id) {
         try {
-            let userExist = await this.repository.getById(id, ['id', 'isAdmin']);
+            const userExist = await this.repository.getById(id, ['id', 'isAdmin']);
             // Check user is not exist.
-            if (!userExist) throw CustomError.badRequest(`Authentication Handler`, "User is not found!");
+            if (!userExist) throw CustomError.badRequest(`Authentication Service`, "User is not found!");
             return userExist;
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotGetEntity(`Authentication Handler`, this.tableName, err);
+            throw CustomError.cannotGetEntity(`Authentication Service`, this.tableName, err);
         }
     }
 }

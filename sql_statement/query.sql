@@ -305,12 +305,19 @@ DROP TABLE [Transaction]
 DROP TABLE TransactionStatus
 DROP TABLE DocumentUser
 DROP TABLE [User]
+DROP TABLE [LoggingDb]
+
+TRUNCATE TABLE DocumentType
+DELETE FROM DocumentType
 
 SELECT * 
 FROM DocumentUser
 
 SELECT * 
 FROM TransactionStatus
+
+SELECT * 
+FROM [LoggingDb]
 
 SELECT * 
 FROM [Transaction]
@@ -320,6 +327,7 @@ FROM DocumentType
 
 SELECT * 
 FROM [User]
+WHERE id != 1
 
 SELECT * 
 FROM [TransactionDocumentType]
@@ -330,21 +338,53 @@ FROM [TransactionComment]
 DELETE FROM [User] 
 WHERE id = 9
 
+DELETE FROM [Transaction] 
+WHERE id = 3
+
 DELETE FROM TransactionDocumentType 
-WHERE transactionId = 1 AND documentTypeId = 2
+WHERE transactionId = 1 AND documentTypeId = 1
 
 -- Update rows in table '[TableName]' in schema '[dbo]'
 UPDATE [dbo].[Transaction]
 SET
-	[transactionStatusId] = 1
-WHERE id = 3
+	[transactionStatusId] = 2
+WHERE id = 2
 GO
 
 -- Update rows in table '[TableName]' in schema '[dbo]'
 UPDATE [dbo].[Transaction]
 SET
-	[userId] = 4
+	[userId] = 3
 WHERE id = 1
 GO
+--
+UPDATE [dbo].[User]
+SET
+	[isAdmin] = 0
+WHERE id = 7
+GO
 
-[id][transactionId][userId][comment][isEdited][createdAt][updatedAt][deletedAt][isAdmin][documentTypeId][transactionStatusId]
+UPDATE [dbo].[DocumentType]
+SET
+	[isRequired] = 1
+WHERE id = 7
+
+
+ALTER TABLE [dbo].[Transaction]
+ADD CONSTRAINT DF__Transacti__trans__1C873BEC DEFAULT 1 FOR transactionStatusId;
+
+ALTER TABLE [dbo].[DocumentType] DROP CONSTRAINT DF__DocumentT__isBot__607251E5
+ALTER TABLE [dbo].[DocumentType] DROP COLUMN [isBoth]
+
+ALTER TABLE [dbo].[DocumentType]
+ADD [isBoth] BIT DEFAULT 1 NOT NULL;
+
+ALTER TABLE [dbo].[DocumentType]
+ADD [isListing] BIT DEFAULT 1 NOT NULL;
+
+ALTER TABLE [dbo].[Transaction]
+ADD [isListing] BIT DEFAULT 1 NOT NULL;
+
+UPDATE [dbo].[DocumentType]
+SET
+	[isListing] = 1

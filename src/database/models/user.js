@@ -1,4 +1,4 @@
-const hash = require('../../helper/hash');
+const Hash = require('../../helper/hash');
 
 module.exports = (sequelize, DataTypes, Model) => {
     class User extends Model {
@@ -15,6 +15,9 @@ module.exports = (sequelize, DataTypes, Model) => {
             allowNull: false,
             validate: {
                 len: [1, 20]
+            },
+            set(value) {
+                this.setDataValue('firstName', value.replace(/\s+/g, ' ').trim());
             }
         },
         lastName: {
@@ -22,13 +25,12 @@ module.exports = (sequelize, DataTypes, Model) => {
             allowNull: false,
             validate: {
                 len: [1, 80]
+            },
+            set(value) {
+                this.setDataValue('lastName', value.replace(/\s+/g, ' ').trim());
             }
         },
         fullName: {
-            // type: DataTypes.VIRTUAL,
-            // get() {
-            //     return `${this.firstName} ${this.lastName}`;
-            // }
             type: DataTypes.STRING(120),
             allowNull: false,
             validate: {
@@ -36,11 +38,11 @@ module.exports = (sequelize, DataTypes, Model) => {
             }
         },
         email: {
-            type: DataTypes.STRING(30),
+            type: DataTypes.STRING(100),
             allowNull: false,
-            isEmail: true,
             validate: {
-                len: [1, 30]
+                isEmail: true,
+                len: [1, 100]
             }
         },
         address: {
@@ -48,14 +50,20 @@ module.exports = (sequelize, DataTypes, Model) => {
             allowNull: false,
             validate: {
                 len: [1, 100]
+            },
+            set(value) {
+                this.setDataValue('address', value.replace(/\s+/g, ' ').trim());
             }
         },
         userName: {
             type: DataTypes.STRING(30),
             allowNull: false,
-            isAlphanumeric: true,
             validate: {
+                isAlphanumeric: true,
                 len: [1, 30]
+            },
+            set(value) {
+                this.setDataValue('userName', value.toLowerCase());
             }
         },
         password: {
@@ -65,7 +73,8 @@ module.exports = (sequelize, DataTypes, Model) => {
                 len: [1, 100]
             },
             set(value) {
-                this.setDataValue('password', hash.hashPassword(this.userName, value))
+                // this.setDataValue('password', Hash.hashPassword(this.userName, value))
+                this.setDataValue('password', Hash.hashPassword(value))
             }
         },
         isAdmin: {

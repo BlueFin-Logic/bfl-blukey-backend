@@ -56,13 +56,13 @@ module.exports.cannotGetEntity = (namespace, entity, rootError = null) => {
 }
 
 module.exports.cannotCreateEntity = (namespace, entity, rootError = null) => {
-    return new CustomError(namespace, 401, `Cannot create entity: ${entity}.`, rootError);
+    return new CustomError(namespace, 400, `Cannot create entity: ${entity}.`, rootError);
 }
 
 module.exports.cannotUpdateEntity = (namespace, entity, rootError = null) => {
-    return new CustomError(namespace, 401, `Cannot update entity: ${entity}.`, rootError);
+    return new CustomError(namespace, 400, `Cannot update entity: ${entity}.`, rootError);
 }
 
 module.exports.cannotDeleteEntity = (namespace, entity, rootError = null) => {
-    return new CustomError(namespace, 401, `Cannot delete entity: ${entity}.`, rootError);
+    return new CustomError(namespace, 400, `Cannot delete entity: ${entity}.`, rootError);
 }

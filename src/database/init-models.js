@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes, Model) => {
     const DocumentType = require("./models/documentType")(sequelize, DataTypes, Model);
     const TransactionStatus = require("./models/transactionStatus")(sequelize, DataTypes, Model);
     const TransactionComment = require("./models/transactionComment")(sequelize, DataTypes, Model);
+    const LoggingDb = require("./models/loggingDb")(sequelize, DataTypes, Model);
 
     // Relationship [User] 1-n [DocumentUser]
     User.hasMany(DocumentUser, {
@@ -133,6 +134,20 @@ module.exports = (sequelize, DataTypes, Model) => {
         onUpdate: 'CASCADE'
     });
 
+    // Relationship [User] 1-n [LoggingDb]
+    User.hasMany(LoggingDb, {
+        as: "loggings",
+        foreignKey: "userId",
+        onDelete: 'NO ACTION',
+        onUpdate: 'CASCADE'
+    });
+    LoggingDb.belongsTo(User, {
+        as: "user",
+        foreignKey: "userId",
+        onDelete: 'NO ACTION',
+        onUpdate: 'CASCADE'
+    });
+
     return {
         User,
         DocumentUser,
@@ -140,6 +155,7 @@ module.exports = (sequelize, DataTypes, Model) => {
         TransactionDocumentType,
         DocumentType,
         TransactionStatus,
-        TransactionComment
+        TransactionComment,
+        LoggingDb
     }
 }

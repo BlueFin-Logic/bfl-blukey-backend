@@ -1,40 +1,47 @@
 class AppContext {
-    #db = null;
-    #tokenJWT = null;
-    #storage = null;
-    #email = null;
+    #db;
+    #sequelize;
+    #tokenJWT;
+    #storage;
+    #email;
+    #loggingDb;
 
-    set setDB(db){
+    constructor(db, sequelize, tokenJWT, storage, email, loggingDb) {
         this.#db = db;
+        this.#sequelize = sequelize;
+        this.#tokenJWT = tokenJWT;
+        this.#storage = storage;
+        this.#email = email;
+        this.#loggingDb = loggingDb;
     }
+
+    // set setDB(db){
+    //     this.#db = db;
+    // }
 
     get getDB(){
         return this.#db;
-    }
-
-    set setTokenJWT(tokenJWT){
-        this.#tokenJWT = tokenJWT;
     }
 
     get getTokenJWT(){
         return this.#tokenJWT;
     }
 
-    set setStorage(storage){
-        this.#storage = storage;
-    }
-
     get getStorage(){
         return this.#storage;
-    }
-
-    set setEmail(email){
-        this.#email = email;
     }
 
     get getEmail(){
         return this.#email;
     }
+
+    get getSequelize(){
+        return this.#sequelize;
+    }
+
+    get getloggingDb(){
+        return this.#loggingDb;
+    }
 }
 
-module.exports = new AppContext()
+module.exports = AppContext

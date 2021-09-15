@@ -1,12 +1,14 @@
 const BaseService = require('../services/base');
 const CustomError = require('../common/error');
 const Time = require('../helper/time');
+const CONFIG = require('../config');
+const Utilities = require('../helper/utilities');
 
 class DocumentUserService extends BaseService {
     constructor(repository, currentUser, storage) {
         super(repository, currentUser);
         this.storage = storage;
-        this.containerName = "userinfo";
+        this.containerName = CONFIG.azureStorage.containerUser;
     }
 
     async upload(dataFile, originalNameFile, mimeTypeFile) {
@@ -14,8 +16,7 @@ class DocumentUserService extends BaseService {
             const currentUserId = this.currentUser.id;
             const folder = `user_${currentUserId}`;
             await this.storage.createContainersIfNotExists(this.containerName);
-
-            // TODO: Format extension name file.
+            
             const fileName = `${currentUserId}_${Time.getCurrentUnixTimestamp()}_${originalNameFile}`;
             await this.storage.uploadDataOnBlob(this.containerName, dataFile, fileName, folder, mimeTypeFile);
 
@@ -36,14 +37,14 @@ class DocumentUserService extends BaseService {
             };
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotCreateEntity(`${this.tableName} Handler`, this.tableName, err);
+            throw CustomError.cannotCreateEntity(`${this.tableName} Service`, this.tableName, err);
         }
     }
 
     async getDocumentInfoByUserId(userId) {
         try {
             if (!this.currentUser.isAdmin) {
-                if (this.currentUser.id !== userId) throw CustomError.forbidden(`${this.tableName} Handler`);
+                if (this.currentUser.id !== userId) throw CustomError.forbidden(`${this.tableName} Service`);
             }
             // Get documents belong to user just have inserted.
             let documents = await this.repository.getByCondition({userId: userId});
@@ -59,7 +60,7 @@ class DocumentUserService extends BaseService {
             });
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotListEntity(`${this.tableName} Handler`, this.tableName, err);
+            throw CustomError.cannotListEntity(`${this.tableName} Service`, this.tableName, err);
         }
     }
 }

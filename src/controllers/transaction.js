@@ -13,7 +13,6 @@ module.exports.getAll = (appContext) => {
             const limit = Utilities.parseInt(req.query.limit, 10);
             const query = req.query;
 
-            // TODO: Show trans belong to User, if admin show all
             const currentUser = req.currentUser;
             const models = appContext.getDB;
             const repository = new Repository(models);
@@ -50,6 +49,27 @@ module.exports.getById = (appContext) => {
         } catch (err) {
             if (err instanceof CustomError.CustomError) next(err);
             else next(CustomError.cannotGetEntity(`${tableName} Controller`, `${tableName}`, err));
+        }
+    }
+}
+
+// Search Suggest
+module.exports.suggest = (appContext) => {
+    return async (req, res, next) => {
+        try {
+            const query = req.query;
+
+            const currentUser = req.currentUser;
+            const models = appContext.getDB;
+            const repository = new Repository(models);
+            const service = new Service(repository, currentUser);
+
+            const data = await service.suggest(query);
+
+            next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Get list ${tableName} successful.`, data))
+        } catch (err) {
+            if (err instanceof CustomError.CustomError) next(err);
+            else next(CustomError.cannotListEntity(`${tableName} Controller`, `${tableName}`, err));
         }
     }
 }

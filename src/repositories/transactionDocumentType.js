@@ -21,10 +21,10 @@ class TransactionDocumentTypeRepository extends BaseRepository {
         return super.getByCondition(conditions, fields, include, order)
     }
 
-    getRestDocumentTypeRequired(transactionId, required = true) {
+    getRestDocumentType(transactionId, required = true, transactionIsListing) {
         try {
             return this.models.DocumentType.findAll({
-                attributes: ["id", "name", "isRequired"],
+                attributes: ['id', 'name', 'isRequired', 'isListing', 'isBoth'],
                 include: {
                     model: this.models.TransactionDocumentType,
                     as: "transactionDocumentTypes",
@@ -38,7 +38,15 @@ class TransactionDocumentTypeRepository extends BaseRepository {
                     '$transactionDocumentTypes.fileName$': {
                         [Op.eq]: null
                     },
-                    isRequired: required
+                    isRequired: required,
+                    [Op.or]: [
+                        {
+                            isBoth: true
+                        },
+                        {
+                            isListing: transactionIsListing
+                        }
+                    ]
                 }
             });
         } catch (error) {
@@ -49,7 +57,7 @@ class TransactionDocumentTypeRepository extends BaseRepository {
     getTransactionInfo(transactionId) {
         try {
             return this.models.Transaction.findOne({
-                attributes: ['id', 'userId', 'transactionStatusId'],
+                attributes: ['id', 'userId', 'transactionStatusId', 'isListing'],
                 where: {
                     id: transactionId
                 }
@@ -57,7 +65,19 @@ class TransactionDocumentTypeRepository extends BaseRepository {
         } catch (error) {
             throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);
         }
+    }
 
+    getDocumentTypeInfo(documentTypeId) {
+        try {
+            return this.models.DocumentType.findOne({
+                attributes: ['id', 'name', 'isRequired', 'isListing', 'isBoth'],
+                where: {
+                    id: documentTypeId
+                }
+            });
+        } catch (error) {
+            throw CustomError.cannotGetEntity(`${this.tableName} Repository`, this.tableName, error);
+        }
     }
 }
 module.exports = TransactionDocumentTypeRepository

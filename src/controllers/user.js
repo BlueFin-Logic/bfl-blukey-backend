@@ -64,7 +64,9 @@ module.exports.create = (appContext) => {
             const service = new Service(repository, currentUser);
 
             const emailService = appContext.getEmail;
-            const data = await service.create(body, emailService);
+            const sequelize = appContext.getSequelize;
+            const loggingDb = appContext.getloggingDb;
+            const data = await service.create(body, emailService, loggingDb, sequelize);
 
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Created ${tableName} successful.`, data))
         } catch (err) {
@@ -85,7 +87,9 @@ module.exports.update = (appContext) => {
             const repository = new Repository(models);
             const service = new Service(repository, currentUser);
 
-            const data = await service.update(userId, body);
+            const sequelize = appContext.getSequelize;
+            const loggingDb = appContext.getloggingDb;
+            const data = await service.update(userId, body, loggingDb, sequelize);
             next(CustomResponse.newSimpleResponse(`${tableName} Controller`, `Updated ${tableName} successful.`, data))
         } catch (err) {
             if (err instanceof CustomError.CustomError) next(err);

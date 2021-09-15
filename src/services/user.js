@@ -1,6 +1,7 @@
 const BaseService = require('../services/base');
 const CustomError = require('../common/error');
-const hash = require('../helper/hash');
+const Hash = require('../helper/hash');
+const Utilities = require('../helper/utilities');
 const {Op} = require('sequelize');
 
 class UserService extends BaseService {
@@ -10,14 +11,14 @@ class UserService extends BaseService {
 
     async getAll(page, limit, query) {
         try {
-            if (!this.currentUser.isAdmin) throw CustomError.forbidden(`${this.tableName} Handler`);
-            const conditions = {
+            if (!this.currentUser.isAdmin) throw CustomError.forbidden(`${this.tableName} Service`);
+            const conditions = query.fullName ? {
                 fullName: {
                     [Op.substring]: `${query.fullName}`
                 }
-            };
-            if (query.fields) query.fields = query.fields.replace(/\s+/g, '').split(',');
-            const {count, rows} = await this.repository.getAll(page, limit, query.fields,conditions);
+            } : null;
+            if (query.fields) query.fields = Utilities.removeAllSpaceString(query.fields).split(',');
+            const {count, rows} = await this.repository.getAll(page, limit, query.fields, conditions);
             return {
                 total: count,
                 data: rows
@@ -31,11 +32,11 @@ class UserService extends BaseService {
     async getById(userId) {
         try {
             if (!this.currentUser.isAdmin) {
-                if (this.currentUser.id !== userId) throw CustomError.forbidden(`${this.tableName} Handler`);
+                if (this.currentUser.id !== userId) throw CustomError.forbidden(`${this.tableName} Service`);
             }
-            let user = await this.repository.getById(userId);
+            const user = await this.repository.getById(userId);
             // Check user is exist.
-            if (!user) throw CustomError.badRequest(`${this.tableName} Handler`, "User is not found!");
+            if (!user) throw CustomError.badRequest(`${this.tableName} Service`, "User is not found!");
             return user;
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
@@ -43,10 +44,10 @@ class UserService extends BaseService {
         }
     }
 
-    async create(data, emailService) {
+    async create(data, emailService, loggingDb, sequelize) {
         try {
-            if (!this.currentUser.isAdmin) throw CustomError.forbidden(`${this.tableName} Handler`);
-            let where = {
+            if (!this.currentUser.isAdmin) throw CustomError.forbidden(`${this.tableName} Service`);
+            const where = {
                 [Op.or]: [
                     {
                         email: {
@@ -63,63 +64,84 @@ class UserService extends BaseService {
 
             const userExist = await this.repository.getOne(where, ['id']);
 
-            if (userExist) throw CustomError.badRequest(`${this.tableName} Handler`, "Email or username already exist!");
+            if (userExist) throw CustomError.badRequest(`${this.tableName} Service`, "Email or username already exist!");
 
-            const result = await this.repository.addItem(data);
+            const result = await sequelize.transaction(async (trans) => {
+                const created = await this.repository.addItem(data, trans);
+                await loggingDb.addItem(this.currentUser.id, this.tableName, created, trans);
+                return created;
+            });
 
             // Send email
-            const subject = emailService.newUserSubject();
-            const content = emailService.newUserContent(data);
-            await emailService.sendMail(data.email, subject, content);
+            emailService.sendMail(
+                result.email, 
+                emailService.newUserSubject(),
+                emailService.newUserContent(result, data.password)
+            );
 
             return {
                 id: result.id
             };
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotCreateEntity(`${this.tableName} Handler`, this.tableName, err);
+            throw CustomError.cannotCreateEntity(`${this.tableName} Service`, this.tableName, err);
         }
     }
 
-    async update(userId, data) {
+    async update(userId, data, loggingDb, sequelize) {
         try {
             if (!this.currentUser.isAdmin) {
-                if (this.currentUser.id !== userId) throw CustomError.forbidden(`${this.tableName} Handler`);
+                if (this.currentUser.id !== userId) throw CustomError.forbidden(`${this.tableName} Service`);
                 delete data.isAdmin;
             }
 
-            let userExist = await this.repository.getById(userId, ['userName', 'password']);
-            if (!userExist) throw CustomError.badRequest(`${this.tableName} Handler`, "User is not found!");
+            const atributes = ['id', 'firstName', 'lastName', 'fullName', 'email', 'address', 'userName', 'password', 'isAdmin', 'lastLoginDate', 'createdAt', 'updatedAt'];
+
+            // const userExist = await this.repository.getById(userId, ['firstName', 'lastName', 'password']);
+            const userExist = await this.repository.getById(userId, atributes);
+            if (!userExist) throw CustomError.badRequest(`${this.tableName} Service`, "User is not found!");
+
+            // Have first name - Miss last name
+            if (data.firstName && !data.lastName) data.lastName = userExist.lastName;
+
+            // Have last name - Miss first name
+            if (data.lastName && !data.firstName) data.firstName = userExist.firstName;
+
+            // Have last name - Have first name
+            if (data.lastName && data.firstName) data.fullName = "";
 
             // Change password
-            if (data.oldPassword) {
-                if (!data.password || userExist.password !== hash.hashPassword(userExist.userName, data.oldPassword)) {
-                    throw CustomError.badRequest(`${this.tableName} Handler`, "Password is not correct!");
-                }
-            } else {
-                delete data.password;
-            }
+            if (data.oldPassword && data.password) {
+                if (data.oldPassword === data.password) throw CustomError.badRequest(`${this.tableName} Service`, "Old Password is not the same as New Password!");
+                if (!await Hash.compareHash(data.oldPassword, userExist.password)) throw CustomError.badRequest(`${this.tableName} Service`, "Password is not correct!");
+            } else delete data.password;
 
             // Update user
-            let result = await this.repository.updateItem(userExist.userName, data, {id: userId});
+            const result = await sequelize.transaction(async (trans) => {
+                const updated = await this.repository.updateItem(data, { id: userId });
+                const user = await this.repository.getById(userId, atributes);
+                await loggingDb.updateItem(this.currentUser.id, this.tableName, userExist, user, trans);
+                return updated;
+            });
+
             return {
                 rowEffects: result.length
             };
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotUpdateEntity(`${this.tableName} Handler`, this.tableName, err);
+            throw CustomError.cannotUpdateEntity(`${this.tableName} Service`, this.tableName, err);
         }
     }
 
     async delete(userId) {
         try {
             if (!this.currentUser.isAdmin) {
-                throw CustomError.forbidden(`${this.tableName} Handler`);
+                throw CustomError.forbidden(`${this.tableName} Service`);
             }
 
-            let user = await this.repository.getById(userId);
+            const user = await this.repository.getById(userId);
             // Check user is exist.
-            if (!user) throw CustomError.badRequest(`${this.tableName} Handler`, "User is not found!");
+            if (!user) throw CustomError.badRequest(`${this.tableName} Service`, "User is not found!");
 
             const conditions = {
                 id: userId
@@ -130,7 +152,7 @@ class UserService extends BaseService {
             }
         } catch (err) {
             if (err instanceof CustomError.CustomError) throw err;
-            throw CustomError.cannotDeleteEntity(`${this.tableName} Handler`, this.tableName, err);
+            throw CustomError.cannotDeleteEntity(`${this.tableName} Service`, this.tableName, err);
         }
     }
 }

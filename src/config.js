@@ -41,7 +41,9 @@ module.exports = {
     },
     azureStorage: {
         storageName: STORAGE_NAME,
-        storageKey: STORAGE_KEY
+        storageKey: STORAGE_KEY,
+        containerTransaction: "transdocs",
+        containerUser: "userinfo"
     },
     email: {
         user: EMAIL_USER,
@@ -59,14 +61,9 @@ module.exports = {
 // SQL_DATABASE=BluKey-SQL
 // SQL_SERVER=blukey-sql.database.windows.net
 
-// SQL_USER=awschat
-// SQL_PASSWORD=Password05
-// SQL_DATABASE=awschatdev
-// SQL_SERVER=awschatpd.database.windows.net
-
 // # azure storage
 // STORAGE_NAME = blukeystoragedev
 // STORAGE_KEY = JFhI+odr/RgkEP2TNiwHzea6sY2K3olwVv61uKdZxaJKv15QpR8PDttXMFqXyzTFF1qoJdBarHUgbazXmDbdpA==
 
-// STORAGE_NAME = awschatclonestorage
-// STORAGE_KEY = LjjoNJOWiw95S86O76JcyNPoEMiOMZvUXaEmC8qpZD3usJmqtGKHyczMmBhOz8blkshZGmhAW0+3NT1hsLkCYA==
+// STORAGE_NAME = blukeystorage
+// STORAGE_KEY = OV35llHMViaiv90h8jwK4KVb8NxL7x8NkNccfKBtLR2Va6kCgmENCB2R+d7XXZxAxHldpgIJkP5SNZzukfOiGw==
