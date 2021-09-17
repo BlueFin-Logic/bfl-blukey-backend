@@ -24,11 +24,11 @@ class BaseRepository {
                     ['updatedAt', 'DESC'],
                 ],
                 distinct: distinct,
-                logging: (sql, timing, queryObject) => console.log({
-                    sql: sql,
-                    timing: timing,
-                    queryObject: queryObject
-                }),
+                // logging: (sql, timing, queryObject) => console.log({
+                //     sql: sql,
+                //     timing: timing,
+                //     queryObject: queryObject
+                // }),
             });
         } catch (error) {
             throw CustomError.cannotListEntity(`${this.tableName} Repository`, this.tableName, error);
